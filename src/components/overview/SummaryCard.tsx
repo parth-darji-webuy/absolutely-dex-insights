@@ -1,5 +1,7 @@
 import { Icon } from "@/components/Icon";
-import { fmt, pct } from "@/lib/format";
+import { aiOverviewSummary } from "@/lib/ask/overview-summary";
+import { getEnv } from "@/lib/env";
+import { ago, fmt, pct } from "@/lib/format";
 import { experiments, overview } from "@/lib/queries";
 import { sum } from "@/lib/rng";
 import { KvGrid } from "./KvGrid";
@@ -15,12 +17,25 @@ export async function SummaryCard() {
 
   const headline =
     !(now > 0) && !(before > 0)
-      ? "No add-to-carts yet this week."
+      ? `No add-to-carts yet this week.${o.lastActivity ? ` The latest activity in the store was ${ago(o.lastActivity)}.` : ""}`
       : Number.isFinite(change) && Math.abs(change) >= 0.05
         ? `Add-to-cart is ${change > 0 ? "up" : "down"} ${Math.abs(change).toFixed(0)}% this week${leader ? `, led by the ${leader.label} variant` : ""}.`
         : Number.isFinite(change)
           ? "Add-to-cart is about the same as last week."
           : `${fmt(now)} add-to-carts this week, nothing from last week to compare with.`;
+
+  // With AI on, Groq words the headline from the figures; if it can't, the sentence above is used.
+  const ai =
+    getEnv().AI_PROVIDER === "groq"
+      ? await aiOverviewSummary({
+          addToCartsThisWeek: now,
+          addToCartsLastWeek: before,
+          changePercent: Number.isFinite(change) ? Math.round(change) : null,
+          visitorsThisWeek: sum(o.visitors),
+          visitorsLastWeek: o.visitorsPrevWeek,
+          runningTests: exps.filter((e) => e.status === "Running").slice(0, 6).map((e) => ({ name: e.name, leading: e.lead, chancePercent: e.chance, liftPercent: Math.round(e.lift) })),
+        })
+      : null;
 
   const diff = now - before;
   const rows: [string, string][] = [
@@ -36,7 +51,7 @@ export async function SummaryCard() {
       <div className="grid size-8 flex-none place-items-center rounded-[9px] bg-accent-soft text-accent-text">
         <Icon name="spark" />
       </div>
-      <SummaryBody line={headline} numbers={<KvGrid items={rows} />} />
+      <SummaryBody line={ai ?? headline} written={ai ? "ai" : "rules"} numbers={<KvGrid items={rows} />} />
     </section>
   );
 }

@@ -90,6 +90,7 @@ export const OVERVIEW: Overview = {
   days: ["Oct 10", "Oct 11", "Oct 12", "Oct 13", "Oct 14", "Oct 15", "Oct 16"],
   visitors: daily(1650),
   visitorsPrevWeek: 11620,
+  lastActivity: null,
   addToCarts: daily(178),
   addToCartsPrevWeek: 1200,
   flagCounts: [2, 3, 3, 4, 4, 4, 4],

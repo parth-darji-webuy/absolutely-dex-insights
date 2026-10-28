@@ -5,6 +5,8 @@ export type Overview = {
   days: string[];
   visitors: number[];
   visitorsPrevWeek: number;
+  /** When the store last recorded anything, in milliseconds since 1970; null when it never has. */
+  lastActivity: number | null;
   addToCarts: number[];
   /** Add-to-carts in the week before `days`. */
   addToCartsPrevWeek: number;
@@ -35,6 +37,8 @@ export type StoreLast30 = {
   visitors: number;
   /** People who entered any test in the window, counted once per test. */
   exposures: number;
+  /** When the store last recorded anything (any time, not only this window), or null if never. */
+  lastActivity: number | null;
   zones: Zone[];
   idle: IdleVisitor[];
   recent: Record<string, RecentWindow>;

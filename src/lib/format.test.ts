@@ -28,9 +28,10 @@ describe("format", () => {
     expect(pct(Infinity)).toBe("—");
   });
 
-  it("ago picks seconds, minutes or hours", () => {
+  it("ago picks seconds, minutes, hours or days", () => {
     const now = 1_800_000_000_000;
     expect([5, 59, 90, 3000, 7200].map((s) => ago(now - s * 1000, now))).toEqual(["5s ago", "59s ago", "2m ago", "50m ago", "2h ago"]);
+    expect([47 * 3600, 48 * 3600, 8 * 86400].map((s) => ago(now - s * 1000, now))).toEqual(["47h ago", "2d ago", "8d ago"]);
     expect(ago(now + 5000, now)).toBe("1s ago");
     expect(ago(NaN, now)).toBe("—");
   });

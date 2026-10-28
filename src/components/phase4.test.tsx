@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { AnswerCard } from "@/components/ask/AnswerCard";
+import { StoreLast30Card } from "@/components/overview/StoreLast30Card";
 import { EventsTable } from "@/components/events/EventsTable";
 import { ReportsPanel } from "@/components/reports/ReportsPanel";
 import { QuickViewReplica } from "@/components/site/QuickViewReplica";
@@ -31,6 +32,21 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh() {}, push() {},
 const BAD = /NaN|undefined|Infinity|>null</;
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
 const ZERO = { seen: 0, btn: 0, eye: 0, opened: 0, heartCard: 0, add: 0, detail: 0, wish: 0, closed: 0, extrasTracked: true };
+
+describe("Store card when the store is quiet", () => {
+  const quiet = { minutes: 30, from: Date.UTC(2026, 9, 29, 9, 30), to: Date.UTC(2026, 9, 29, 10, 0), visitors: 0, exposures: 0, lastActivity: Date.UTC(2026, 9, 29, 9, 12), zones: [], idle: [], recent: {} };
+  it("says nobody came and when the latest activity was, instead of just showing zeros", () => {
+    const m = html(<StoreLast30Card initial={quiet} experiments={[]} />);
+    expect(m).toContain("Quiet right now: nobody in the last 30 minutes. The latest activity was 48m ago");
+    expect(m).not.toMatch(BAD);
+  });
+  it("copes with a store that has never recorded anything", () => {
+    expect(html(<StoreLast30Card initial={{ ...quiet, lastActivity: null }} experiments={[]} />)).toContain("hasn’t recorded any activity yet");
+  });
+  it("shows no note when people are there", () => {
+    expect(html(<StoreLast30Card initial={{ ...quiet, visitors: 3 }} experiments={[]} />)).not.toContain("Quiet right now");
+  });
+});
 
 describe("Events page", () => {
   it("lists the latest 40 events with an 'ago' next to each time", () => {

@@ -104,6 +104,11 @@ describe("Overview pieces", () => {
     expect(out).toMatch(/<div[^>]*hidden/);
   });
 
+  it("says whether the summary was written by AI or by the app's own rules", () => {
+    expect(html(<SummaryBody line="x" numbers={<b>1</b>} />)).toContain("Written from the numbers below, no AI");
+    expect(html(<SummaryBody line="x" numbers={<b>1</b>} written="ai" />)).toContain("Written by AI (Groq) from the numbers below");
+  });
+
   it("handles devices with no visitors", () => {
     const rows = [{ label: "Mobile", visitors: 0, addToCarts: 0, color: "red" }];
     const out = html(<DeviceRows rows={rows} total={0} best={null} note={null} />);

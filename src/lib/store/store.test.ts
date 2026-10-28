@@ -207,6 +207,14 @@ describe("store card", () => {
     expect(s.exposures).toBe(0);
   });
 
+  it("says when the store last recorded anything, even if it is outside the window", async () => {
+    answer = (sql) => (sql.includes("SELECT MAX(at) AS at") ? [{ at: new Date("2026-10-21T10:00:44Z") }] : []);
+    expect((await loadStoreLast30(NOW)).lastActivity).toBe(Date.parse("2026-10-21T10:00:44Z"));
+    expect((await loadOverview(NOW)).lastActivity).toBe(Date.parse("2026-10-21T10:00:44Z"));
+    answer = () => [];
+    expect((await loadStoreLast30(NOW)).lastActivity).toBeNull();
+  });
+
   it("counts people at each stop, exposures and per-minute people with empty minutes as 0", async () => {
     answer = (sql, values) => {
       if (sql.includes("GROUP BY 1, 2, 7")) return [{ key: "qv", vid: 0, vname: "C", vvalue: "false", flag: "f", ename: "QV", day: "2026-10-29", people: 5 }];

@@ -6,7 +6,7 @@ import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { fmt } from "@/lib/format";
+import { ago, clock, fmt } from "@/lib/format";
 import type { Experiment, StoreLast30 } from "@/types";
 import { AllTables } from "./AllTables";
 import { KvGrid } from "./KvGrid";
@@ -112,6 +112,13 @@ export function StoreLast30Card({ initial, experiments }: { initial: StoreLast30
           ["Experiments running", fmt(tests.length)],
         ]}
       />
+      {data.visitors === 0 && (
+        <p className="mb-3 text-[13px] text-text2" role="status" suppressHydrationWarning>
+          {data.lastActivity
+            ? `Quiet right now: nobody in the last ${n} minutes. The latest activity was ${ago(data.lastActivity, data.to)} (${clock(data.lastActivity)}).`
+            : `Quiet right now: the store hasn’t recorded any activity yet.`}
+        </p>
+      )}
       <StoreScene zones={data.zones} idle={data.idle} minutes={n} />
       {tests.length === 0 ? (
         <EmptyState title="No experiments running" text={`Tests that are running will show their last ${n} minutes here.`} />

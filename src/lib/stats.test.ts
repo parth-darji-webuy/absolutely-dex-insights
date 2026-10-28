@@ -97,3 +97,11 @@ describe("isLeading", () => {
     expect(isLeading(94, -2)).toBe(false);
   });
 });
+
+describe("verdict with a very slow test", () => {
+  it("doesn't promise hundreds of days", () => {
+    const [, sentence] = verdict({ chance: 46, lift: 1, people: 1088, needed: 20000, smallest: 535, pace: 99, control: "Control", treatment: "Treatment" });
+    expect(sentence).toContain("more than two months");
+    expect(sentence).not.toMatch(/\d{3} more days/);
+  });
+});

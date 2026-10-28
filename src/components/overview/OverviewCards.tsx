@@ -4,7 +4,7 @@ import { Donut } from "@/components/charts";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getStoreLast30 } from "@/lib/data";
-import { fmt, pct } from "@/lib/format";
+import { ago, fmt, pct } from "@/lib/format";
 import { experiments, overview, products as getProducts } from "@/lib/queries";
 import { sum } from "@/lib/rng";
 import type { EventType } from "@/types";
@@ -26,8 +26,8 @@ export async function ActivityCard() {
   const range = o.days.length ? `${o.days[0]}${o.days.length > 1 && last ? ` – ${last}` : ""}` : "";
   return (
     <Card title="Activity over time" subtitle={`Events per day, stacked by type${range ? ` · ${range}` : ""}`} source={{ tables: [<AllTables key="all" />] }} delay={100}>
-      {o.days.length === 0 ? (
-        <EmptyState title="No activity yet" text="Events will show up here as soon as people visit the store." />
+      {o.days.length === 0 || keys.every((k) => sum(o.daily[k]) === 0) ? (
+        <EmptyState title="No activity in these days" text={o.lastActivity ? `The store has recorded nothing in the last ${o.days.length || 7} days. The latest activity was ${ago(o.lastActivity)}.` : "Events will show up here as soon as people visit the store."} />
       ) : (
         <ActivityChart labels={o.days} series={series} />
       )}

@@ -2,6 +2,13 @@
 
 A dashboard for the store's A/B tests, events and products. It runs only on this computer and only reads the store's database.
 
+## In short
+
+- **What it shows:** how the store is doing this week (Overview), each A/B test and who is winning (Experiments), every tracked event (Events), what people look at and add to the cart (Products), and daily CSV reports per test (Reports).
+- **Where the numbers come from:** the store's Neon database, read through a read-only login, plus the list of running tests from GrowthBook. Nothing is written to either.
+- **Ask your data:** type a question in plain English and get an answer with the numbers and the SQL behind it. The AI part is Groq (see below) and can be switched off.
+- **Who can use it:** one Admin account, on this computer only.
+
 ## First time
 
 1. Use Node 22.12 or newer (`nvm use` reads `.nvmrc`).
@@ -45,6 +52,19 @@ By default a test's goal is "added to cart". To count something else, add the ex
 Set `AI_PROVIDER=none` in `.env` and restart. Ask disappears from ⌘K and the header search, and `/ask` says "Ask your data is switched off". Everything else keeps working. To switch it back on set `AI_PROVIDER=groq` and fill in `GROQ_API_KEY` and `GROQ_MODEL`.
 
 How Ask stays safe: the AI only writes a query. The server checks it (one `SELECT`, the eight allowed tables, no system tables, no write words, `LIMIT 200`) before anything runs, and runs it read-only with a 15-second limit. Visitor ids are shortened before anything is sent to the AI. At most 10 questions a minute.
+
+## What Groq is
+
+Groq is the company whose servers run the AI model behind Ask your data (here `GROQ_MODEL`, for example `openai/gpt-oss-120b`). It is not Elon Musk's "Grok", and it is not a database: it only reads and writes text.
+
+For each question Insights makes two short calls to Groq:
+
+1. **Question to SQL.** Groq is given the question and a list of the eight tables it may use, and writes one query. It never sees the database itself.
+2. **Rows to words.** After the server has checked and run that query, Groq is given the rows (visitor ids shortened) and writes one or two plain sentences.
+
+A third, smaller use is the headline at the top of Overview. With `AI_PROVIDER=groq`, Groq is given this week's add-to-cart and visitor totals and the running tests' names, chances and lifts (no visitor data), and writes one sentence. The page drops it and uses its own sentence if Groq is slow or fails, or if the sentence contains a number it was not given. It reuses one answer for 30 minutes, and the label under it says whether it was written by AI.
+
+So the question text and the query results leave this computer and go to Groq. The database password never does, and nothing the AI writes runs until the server has checked it. Needs `GROQ_API_KEY` in `.env` (a key from your Groq account); free accounts have usage limits, which is when you see "The AI is busy, try again in a minute". Set `AI_PROVIDER=none` to stop sending anything to Groq.
 
 ## Other commands
 

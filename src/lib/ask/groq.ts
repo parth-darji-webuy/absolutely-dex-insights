@@ -36,25 +36,24 @@ Do not mention SQL, tables or columns, and do not invent numbers. If the rows ar
 
 const COMMON = { temperature: 0, max_completion_tokens: 2048 } as const;
 
+/** One question to the AI and its text answer. Throws LlmError (with no details) when Groq is busy, slow or failing. */
+export async function groqChat(system: string, user: string, opts: { timeoutMs?: number } = {}): Promise<string> {
+  const env = getEnv();
+  const client = new Groq({ apiKey: env.GROQ_API_KEY, timeout: opts.timeoutMs ?? 25_000, maxRetries: 1 });
+  try {
+    const res = await client.chat.completions.create({ model: env.GROQ_MODEL as string, ...COMMON, messages: [{ role: "system", content: system }, { role: "user", content: user }] });
+    return res.choices[0]?.message?.content ?? "";
+  } catch (error) {
+    // Log what kind of failure it was, never its message (it can contain request details).
+    console.error("Groq failed:", error instanceof Error ? error.name : "unknown error");
+    throw new LlmError();
+  }
+}
+
 /** The real AI, through Groq. */
 export function groqDeps(): Pick<AskDeps, "writeSql" | "summarize"> {
-  const env = getEnv();
-  const client = new Groq({ apiKey: env.GROQ_API_KEY, timeout: 25_000, maxRetries: 1 });
-  const model = env.GROQ_MODEL as string;
-
-  const chat = async (system: string, user: string): Promise<string> => {
-    try {
-      const res = await client.chat.completions.create({ model, ...COMMON, messages: [{ role: "system", content: system }, { role: "user", content: user }] });
-      return res.choices[0]?.message?.content ?? "";
-    } catch (error) {
-      // Log what kind of failure it was, never its message (it can contain request details).
-      console.error("Groq failed:", error instanceof Error ? error.name : "unknown error");
-      throw new LlmError();
-    }
-  };
-
   return {
-    writeSql: (question, ctx) => chat(sqlPrompt(ctx), JSON.stringify({ question })),
-    summarize: (question, _sql, columns, rows, total) => chat(summaryPrompt, JSON.stringify({ question, columns, rows, rowsReturned: total, rowsShown: rows.length })),
+    writeSql: (question, ctx) => groqChat(sqlPrompt(ctx), JSON.stringify({ question })),
+    summarize: (question, _sql, columns, rows, total) => groqChat(summaryPrompt, JSON.stringify({ question, columns, rows, rowsReturned: total, rowsShown: rows.length })),
   };
 }

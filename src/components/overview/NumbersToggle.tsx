@@ -5,7 +5,7 @@ import { Icon } from "@/components/Icon";
 import { cn } from "@/lib/cn";
 
 /** The summary line, its "Show the numbers" link, and the numbers that open underneath. */
-export function SummaryBody({ line, numbers }: { line: ReactNode; numbers: ReactNode }) {
+export function SummaryBody({ line, numbers, written = "rules" }: { line: ReactNode; numbers: ReactNode; /** "ai": worded by Groq from the numbers. "rules": worded by the app, no AI. */ written?: "ai" | "rules" }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   return (
@@ -15,7 +15,7 @@ export function SummaryBody({ line, numbers }: { line: ReactNode; numbers: React
         <span className="inline-flex h-[22px] items-center gap-[5px] rounded-md border border-[color-mix(in_srgb,var(--accent)_35%,transparent)] bg-accent-soft px-2 text-[11.5px] font-[550] text-accent-text">
           <Icon name="spark" size="sm" /> Summary
         </span>
-        <span>Written from the numbers below, no AI</span>
+        <span>{written === "ai" ? "Written by AI (Groq) from the numbers below" : "Written from the numbers below, no AI"}</span>
         <button
           type="button"
           aria-expanded={open}

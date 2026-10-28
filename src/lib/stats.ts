@@ -71,12 +71,12 @@ const daysFor = (people: number, pace: number) => (pace > 0 && people > 0 ? Math
 export function verdict(v: VerdictInput): [string, string] {
   const left = Math.max(0, v.needed - v.people);
   const days = daysFor(left, v.pace);
-  const wait = days ? `Roughly ${days} more day${days === 1 ? "" : "s"} of data needed.` : left > 0 ? `About ${fmt(left)} more people needed.` : "It has enough people.";
+  const wait = days && days > 60 ? "At the current pace that would take more than two months." : days ? `Roughly ${days} more day${days === 1 ? "" : "s"} of data needed.` : left > 0 ? `About ${fmt(left)} more people needed.` : "It has enough people.";
   if (v.people < 100 || v.smallest < 30)
     return ["Too early to tell.", `Only ${fmt(v.people)} ${v.people === 1 ? "person has" : "people have"} seen this test so far. It needs roughly ${fmt(v.needed)} before the numbers mean much.`];
   if (v.chance >= 95 && v.lift > 0)
     return [`${v.treatment} is winning.`, left > 0 ? `About ${v.chance}% sure. Wait ${days ? `~${days} more day${days === 1 ? "" : "s"} ` : ""}to reach ${fmt(v.needed)} people, then ship it.` : `About ${v.chance}% sure, and it has enough people. You can ship it.`];
-  if (v.chance >= 90 && v.lift > 0) return ["Treatment is probably winning.", `About ${v.chance}% sure. ${days ? `Wait ~${days} more day${days === 1 ? "" : "s"} to be safe.` : "Wait a little longer to be safe."}`];
+  if (v.chance >= 90 && v.lift > 0) return ["Treatment is probably winning.", `About ${v.chance}% sure. ${days && days <= 60 ? `Wait ~${days} more day${days === 1 ? "" : "s"} to be safe.` : "Wait a little longer to be safe."}`];
   if (v.chance <= 5 && v.lift < 0) return [`${v.control} is winning.`, `About ${100 - v.chance}% sure it does better than ${v.treatment}. ${left > 0 ? wait : "It has enough people."}`];
   if (v.chance >= 75 && v.lift > 0) return [`${v.treatment} may be ahead.`, `About ${v.chance}% sure. ${wait}`];
   return ["Too early to tell.", `No clear difference yet (about ${v.chance}% sure that ${v.treatment} is better). ${wait}`];

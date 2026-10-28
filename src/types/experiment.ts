@@ -39,6 +39,8 @@ export type Experiment = Omit<ExperimentSeed, "verb" | "metricShort" | "series">
   /** Relative lift of treatment over control, in %. */
   lift: number;
   progress: number;
+  /** Likely range of the true lift, see LiftRange. */
+  liftCi: LiftRange;
 };
 
 /** Indicative lift range [low, high] in %, not GrowthBook's official interval. */

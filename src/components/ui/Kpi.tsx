@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, ReactNode, Ref } from "react";
 import { Sparkline } from "@/components/charts/Sparkline";
 import { cn } from "@/lib/cn";
 import { CountUp } from "./CountUp";
@@ -20,6 +20,8 @@ type KpiProps = {
   loading?: boolean;
   /** Makes the whole card a link. */
   href?: string;
+  /** Makes the whole card a button (e.g. the trigger props from <Popover>). */
+  button?: ButtonHTMLAttributes<HTMLButtonElement> & { ref?: Ref<HTMLButtonElement> };
   delay?: number;
   id: string;
 };
@@ -28,7 +30,7 @@ const BASE =
   "fade relative flex min-w-0 flex-col gap-1.5 overflow-hidden rounded-lg border border-border bg-card px-5 pt-[18px] pb-4 text-left shadow-[0_1px_2px_rgba(16,24,40,.04)] transition-[transform,box-shadow,border-color] duration-200";
 const HOVER = "hover:-translate-y-0.5 hover:border-border2 hover:shadow-[0_10px_24px_rgba(16,24,40,.08)]";
 
-export function Kpi({ label, tip, value, format = "int", unit, foot, spark, loading, href, delay = 0, id }: KpiProps) {
+export function Kpi({ label, tip, value, format = "int", unit, foot, spark, loading, href, button, delay = 0, id }: KpiProps) {
   const style = { "--d": `${delay}ms` } as CSSProperties;
   if (loading)
     return (
@@ -53,6 +55,12 @@ export function Kpi({ label, tip, value, format = "int", unit, foot, spark, load
       <Link href={href} className={cn(BASE, HOVER)} style={style}>
         {body}
       </Link>
+    );
+  if (button)
+    return (
+      <button type="button" className={cn(BASE, HOVER, "w-full cursor-pointer")} style={style} {...button}>
+        {body}
+      </button>
     );
   return (
     <div className={cn(BASE, HOVER)} style={style}>

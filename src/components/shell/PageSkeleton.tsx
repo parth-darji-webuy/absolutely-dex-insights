@@ -14,10 +14,10 @@ function Heading() {
 }
 
 /** What a page looks like while its data loads: the heading, then grey cards shaped like the real ones. */
-export function PageSkeleton({ variant }: { variant: Variant }) {
+export function PageSkeleton({ variant, noHeading }: { variant: Variant; /** The page already shows its own heading. */ noHeading?: boolean }) {
   return (
     <>
-      <Heading />
+      {!noHeading && <Heading />}
       {variant === "overview" && (
         <>
           <Card loading skeleton="text" />

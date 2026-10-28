@@ -25,6 +25,13 @@ const SEEDS: ExperimentSeed[] = [
   },
 ];
 
+const LIFT_CI: Record<string, LiftRange> = {
+  "add-to-cart": [-3, 45],
+  "quick-view-ab-test": [-14, 31],
+  "whats-new-ab-test": [6, 98],
+  "theme-toggle-ab-test": [-11, 95],
+};
+
 const METRIC_TABLE: Record<string, string> = {
   "add-to-cart": "add_to_cart_tracking",
   "quick-view-ab-test": "add_to_cart_tracking",
@@ -53,6 +60,7 @@ function withDerived(seed: ExperimentSeed): Experiment {
     metricShort: seed.metricShort ?? "add-to-cart rate",
     series,
     mtable: METRIC_TABLE[seed.key] ?? "",
+    liftCi: LIFT_CI[seed.key] ?? [-10, 10],
     people,
     rc,
     rt,
@@ -63,13 +71,6 @@ function withDerived(seed: ExperimentSeed): Experiment {
 
 export const EXPS: Experiment[] = SEEDS.map(withDerived);
 export const EBY: Record<string, Experiment> = Object.fromEntries(EXPS.map((e) => [e.key, e]));
-
-export const LIFT_CI: Record<string, LiftRange> = {
-  "add-to-cart": [-3, 45],
-  "quick-view-ab-test": [-14, 31],
-  "whats-new-ab-test": [6, 98],
-  "theme-toggle-ab-test": [-11, 95],
-};
 
 /** Day each test started (October), used for chart labels. */
 export const START_DAY: Record<string, number> = { "add-to-cart": 6, "quick-view-ab-test": 11, "whats-new-ab-test": 8, "theme-toggle-ab-test": 9 };

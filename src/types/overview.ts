@@ -6,6 +6,15 @@ export type Overview = {
   visitors: number[];
   visitorsPrevWeek: number;
   addToCarts: number[];
+  /** Add-to-carts in the week before `days`. */
+  addToCartsPrevWeek: number;
+  /** Feature flags on and experiments running, per day of `days`. */
+  flagCounts: number[];
+  runningCounts: number[];
+  /** Not tracked yet: needs a referrer column. */
+  sources: { label: string; value: number }[];
+  /** Not tracked yet: needs a device column. Visitors and add-to-carts per device. */
+  devices: { label: string; visitors: number; addToCarts: number }[];
   eventMeta: Record<EventType, EventMeta>;
   daily: Record<EventType, number[]>;
 };

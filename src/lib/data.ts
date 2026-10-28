@@ -1,6 +1,6 @@
 // The only place pages get data from. Until phase 6 these return the sample data after 400 ms;
 // then they become real queries with the same names and types.
-import { ATC, DAILY, DAYS, EBY, EVT_META, EXPS, generateEvents, PRODUCTS, CATS, COLOURS, QV, IDLE, RECENT, RECENT_MIN, RECENT_VISITORS, VIS, VIS_PREV, ZONES } from "@/mocks";
+import { ATC, ATC_PREV, DAILY, DAYS, DEVICES, FLAG_COUNTS, RUNNING_COUNTS, SOURCES, EBY, EVT_META, EXPS, generateEvents, PRODUCTS, CATS, COLOURS, QV, IDLE, RECENT, RECENT_MIN, RECENT_VISITORS, VIS, VIS_PREV, ZONES } from "@/mocks";
 import type { AnalyticsEvent, Experiment, Overview, ProductsData, ReportRow, StoreLast30 } from "@/types";
 import { daysBetween, eachDay, expDay, WDAY, ymd } from "./dates";
 
@@ -11,7 +11,7 @@ const later = async <T>(make: () => T): Promise<T> => {
 };
 
 export const getOverview = (): Promise<Overview> =>
-  later(() => ({ days: DAYS, visitors: VIS, visitorsPrevWeek: VIS_PREV, addToCarts: ATC, eventMeta: EVT_META, daily: DAILY }));
+  later(() => ({ days: DAYS, visitors: VIS, visitorsPrevWeek: VIS_PREV, addToCarts: ATC, addToCartsPrevWeek: ATC_PREV, flagCounts: FLAG_COUNTS, runningCounts: RUNNING_COUNTS, sources: SOURCES, devices: DEVICES, eventMeta: EVT_META, daily: DAILY }));
 
 export const getStoreLast30 = (): Promise<StoreLast30> =>
   later(() => ({ minutes: RECENT_MIN, visitors: RECENT_VISITORS, zones: ZONES, idle: IDLE, recent: RECENT }));

@@ -4,6 +4,7 @@ import { type ReactNode, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "@/components/Icon";
 import { useDialog } from "@/hooks/useDialog";
+import { useMounted } from "@/hooks/useMounted";
 import { cn } from "@/lib/cn";
 import { Button } from "./Button";
 
@@ -18,8 +19,9 @@ type DrawerProps = {
 /** A panel that slides in from the right, over a dimmed page. */
 export function Drawer({ open, onClose, title, subtitle, children }: DrawerProps) {
   const ref = useRef<HTMLElement>(null);
+  const mounted = useMounted();
   useDialog(ref, open, onClose);
-  if (typeof document === "undefined") return null;
+  if (!mounted) return null;
   return createPortal(
     <>
       <div

@@ -1,7 +1,7 @@
 // The only place pages get data from. Until phase 6 these return the sample data after 400 ms;
 // then they become real queries with the same names and types.
-import { ATC, ATC_PREV, DAILY, DAYS, DEVICES, FLAG_COUNTS, RUNNING_COUNTS, SOURCES, EBY, EVT_META, EXPS, generateEvents, PRODUCTS, CATS, COLOURS, QV, IDLE, RECENT, RECENT_MIN, RECENT_VISITORS, VIS, VIS_PREV, ZONES } from "@/mocks";
-import type { AnalyticsEvent, Experiment, Overview, ProductsData, ReportRow, StoreLast30 } from "@/types";
+import { ATC, ATC_PREV, DAILY, DAYS, DEVICES, FLAG_COUNTS, RUNNING_COUNTS, SOURCES, EBY, EVT_META, EXPS, generateEvents, generateEventsPerMinute, PRODUCTS, CATS, COLOURS, QV, IDLE, RECENT, RECENT_MIN, RECENT_VISITORS, VIS, VIS_PREV, ZONES } from "@/mocks";
+import type { AnalyticsEvent, EventsPerMinute, Experiment, Overview, ProductsData, ReportRow, StoreLast30 } from "@/types";
 import { daysBetween, eachDay, expDay, WDAY, ymd } from "./dates";
 
 const LATENCY_MS = 400;
@@ -22,6 +22,9 @@ export const getExperiments = (): Promise<Experiment[]> => later(() => EXPS);
 export const getExperiment = (key: string): Promise<Experiment | null> => later(() => EBY[key] ?? null);
 
 export const getEvents = (): Promise<AnalyticsEvent[]> => later(() => generateEvents());
+
+/** Events in each of the last 60 minutes, for the Events page chart. */
+export const getEventsPerMinute = (): Promise<EventsPerMinute> => later(() => generateEventsPerMinute());
 
 export const getProducts = (): Promise<ProductsData> => later(() => ({ products: PRODUCTS, cats: CATS, colours: COLOURS, qv: QV }));
 

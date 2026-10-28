@@ -15,13 +15,13 @@ export const niceDate = (d: Date): string => `${pad2(d.getDate())} ${MON[d.getMo
 const DAY = 864e5;
 const dayStart = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-const todayStart = () => dayStart(new Date());
+export const todayStart = () => dayStart(new Date());
 
 /** Longest period one download can cover. */
 export const RANGE_MAX = 366;
 
 /** Tracking began on 1 Sep 2026 (or 90 days ago, if that is earlier than today's window). */
-const trackStart = (today: Date) => {
+export const trackStart = (today: Date) => {
   const t = new Date(2026, 8, 1);
   return t < today ? t : addDays(today, -90);
 };
@@ -87,4 +87,24 @@ export function expDay(e: Experiment, d: Date, today: Date = todayStart()): { c:
   const r = rng(seedOf(e.key + ymd(d)));
   const avg = e.days ? e.people / e.days / 2 : 0;
   return { c: Math.round(avg * (0.85 + r() * 0.3)), t: Math.round(avg * (0.85 + r() * 0.3)) };
+}
+
+/** "2026-10-21" -> a local date, or null when it isn't a real YYYY-MM-DD date. */
+export function parseYMD(s: string | null | undefined): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s ?? "");
+  if (!m) return null;
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  return ymd(d) === s ? d : null;
+}
+
+/** "Europe/London (UTC+01:00)" */
+export function tzLabel(d: Date = new Date()): string {
+  let name = "Local time";
+  try {
+    name = Intl.DateTimeFormat().resolvedOptions().timeZone || name;
+  } catch {
+    // keep the fallback
+  }
+  const off = -d.getTimezoneOffset();
+  return `${name} (UTC${off >= 0 ? "+" : "−"}${pad2(Math.floor(Math.abs(off) / 60))}:${pad2(Math.abs(off) % 60)})`;
 }

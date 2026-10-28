@@ -36,3 +36,10 @@ export type AnalyticsEvent = {
   experimentKey?: string;
   variationName?: string;
 };
+
+/** Events in each of the last 60 minutes, split by type, oldest first. */
+export type EventsPerMinute = {
+  /** "−59m" … "now" */
+  labels: string[];
+  series: { key: EventType; name: string; color: string; values: number[] }[];
+};

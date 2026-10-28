@@ -3,6 +3,7 @@
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useTip } from "@/components/ui/Tooltip";
 import { fmt, pct } from "@/lib/format";
+import { BUSY_VIEWS } from "@/lib/products";
 import type { Product } from "@/types";
 import { safe, sumOf } from "./chart-utils";
 
@@ -12,8 +13,6 @@ const PL = 50;
 const PR = 24;
 const PT = 18;
 const PB = 40;
-/** The "viewed a lot, rarely added" zone starts here. */
-const BUSY_VIEWS = 2700;
 
 // Where a label sits next to its bubble. Products not listed go to the right.
 const LABEL_SIDE: Record<string, "start" | "end" | "middle"> = {

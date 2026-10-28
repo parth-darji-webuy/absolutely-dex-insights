@@ -7,7 +7,7 @@ import { Hot } from "./Hot";
  * The store's product card. With `qv` the Quick View button and eye icon are shown, with the
  * share of people who used them; without it the card says there is no quick view in this version.
  */
-export function ProductCard({ quick = true, qv }: { quick?: boolean; qv?: QuickViewStats }) {
+export function ProductCard({ quick = true, qv, onOpen }: { quick?: boolean; qv?: QuickViewStats; /** Makes the Quick View button and eye icon clickable. */ onOpen?: () => void }) {
   const share = (n: number) => (qv && qv.seen > 0 ? pct((n / qv.seen) * 100) : "—");
   return (
     <div className="site site-card">
@@ -27,11 +27,11 @@ export function ProductCard({ quick = true, qv }: { quick?: boolean; qv?: QuickV
         </button>
         {quick ? (
           <div className="sc-actions">
-            <button className="sc-qv hs" tabIndex={-1}>
+            <button className={`sc-qv hs${onOpen ? " qv-open" : ""}`} tabIndex={onOpen ? 0 : -1} onClick={onOpen}>
               <Icon name="bag" size="sm" /> Quick View
               {qv && <Hot tip={`Opened via the Quick View button: ${fmt(qv.btn)} of ${fmt(qv.seen)} who saw it`}>{share(qv.btn)}</Hot>}
             </button>
-            <button className="sc-eye hs" tabIndex={-1} aria-label="Quick view">
+            <button className={`sc-eye hs${onOpen ? " qv-open" : ""}`} tabIndex={onOpen ? 0 : -1} aria-label="Quick view" onClick={onOpen}>
               <Icon name="eye" size="sm" />
               {qv && (
                 <Hot lo tip={`Opened via the eye icon: ${fmt(qv.eye)} of ${fmt(qv.seen)}`}>

@@ -1,6 +1,7 @@
-import { rng } from "@/lib/rng";
-import type { AnalyticsEvent, EventSchema, EventType, IdKind } from "@/types";
+import { rng, sum } from "@/lib/rng";
+import type { AnalyticsEvent, EventSchema, EventsPerMinute, EventType, IdKind } from "@/types";
 import { EBY, EXPS } from "./experiments";
+import { EVT_META } from "./overview";
 import { PRODUCTS } from "./products";
 
 export const VISITORS = ["kT9xQ2mLpA4w", "Rb7nW3eYs0Qd", "pZ4cH8uVt2Lk", "Xm1fJ6gNq9Ea", "dS5yK0rTw7Bc", "Hq2vL9oPz4Mn", "wE8bA3iUc6Ry", "Nc0gT5hXk1Js", "gY3mR8sDq2Vo", "Lf6tB1zKp9Wu"];
@@ -93,4 +94,21 @@ export function generateEvents(now: number = Date.now()): AnalyticsEvent[] {
     add(TYPES_W[Math.floor(r() * TYPES_W.length)], v, t);
   }
   return list.sort((a, b) => b.ts - a.ts);
+}
+
+const TYPE_SHARE = [0.6, 0.13, 0.17, 0.045, 0.025, 0.03];
+const LAST_HOUR_TOTAL = 529;
+
+/** Seeded sample of events per minute for the last hour (529 events, a dip around 12 to 16 minutes ago). */
+export function generateEventsPerMinute(): EventsPerMinute {
+  const r = rng(11);
+  const types = Object.keys(EVT_META) as EventType[];
+  const w = Array.from({ length: 60 }, (_, i) => 0.7 + r() * 0.6 - (i > 44 && i < 50 ? 0.35 : 0));
+  const ws = sum(w);
+  const tot = w.map((x) => Math.round((LAST_HOUR_TOTAL * x) / ws));
+  tot[59] += LAST_HOUR_TOTAL - sum(tot);
+  const series = types.map((key, ti) => ({ key, name: EVT_META[key].label, color: EVT_META[key].c, values: tot.map((t) => (ti === 0 ? 0 : Math.round(t * TYPE_SHARE[ti]))) }));
+  series[0].values = tot.map((t, i) => t - sum(series.slice(1).map((s) => s.values[i])));
+  const labels = Array.from({ length: 60 }, (_, i) => (i === 59 ? "now" : `−${59 - i}m`));
+  return { labels, series };
 }

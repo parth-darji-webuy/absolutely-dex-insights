@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { ACCOUNT } from "./mock-auth";
 import { SESSION_COOKIE, verifySession } from "./session-token";
 
@@ -17,7 +18,9 @@ const initialsOf = (name: string) =>
 /** The signed-in user, or null. Safe to call anywhere on the server. */
 export async function getOptionalUser(): Promise<User | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  const session = await verifySession(token, process.env.SESSION_SECRET);
+  // Checking expiry reads the clock, which Next.js only allows once the request is known to be dynamic.
+  await connection();
+  const session = await verifySession(token, process.env.SESSION_SECRET, Date.now());
   if (!session || session.email !== ACCOUNT.email) return null;
   return { name: ACCOUNT.name, email: ACCOUNT.email, role: ACCOUNT.role, initials: initialsOf(ACCOUNT.name) };
 }

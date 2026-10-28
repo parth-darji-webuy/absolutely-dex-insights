@@ -12,7 +12,7 @@ const INSIGHTS_COLOUR: Record<Exclude<BrandVariant, "mark">, string> = {
   white: "text-white/90",
 };
 
-export function BrandMark({ variant = "light", className = "" }: { variant?: BrandVariant; className?: string }) {
+export function BrandMark({ variant = "light", className = "", priority }: { variant?: BrandVariant; className?: string; priority?: boolean }) {
   if (variant === "mark") {
     return (
       <Image
@@ -20,6 +20,7 @@ export function BrandMark({ variant = "light", className = "" }: { variant?: Bra
         alt="AbsolutelyDeX Insights"
         width={168}
         height={66}
+        priority={priority}
         className={`h-auto w-[42px] ${className}`}
       />
     );
@@ -31,6 +32,7 @@ export function BrandMark({ variant = "light", className = "" }: { variant?: Bra
         alt="AbsolutelyDeX Insights"
         width={560}
         height={86}
+        priority={priority}
         className="block h-auto w-full"
       />
       <div

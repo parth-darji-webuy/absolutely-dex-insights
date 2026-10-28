@@ -22,11 +22,6 @@ export const EVENT_TABLE: Record<EventType, string> = {
   theme_toggle: "theme_toggle_tracking",
 };
 
-/** One row exactly as stored in its table: id, anonymousId, the table's own columns, createdAt. */
-export function storedRow(e: AnalyticsEvent): Record<string, string | number | boolean | null> {
-  return { id: e.rowId, anonymousId: e.visitor, ...e.props, createdAt: Number.isFinite(e.ts) ? new Date(e.ts).toISOString() : "" };
-}
-
 /** [headline, detail] for one step of the visitor journey. */
 export function journeyText(e: AnalyticsEvent): [string, string] {
   const product = e.product ?? "a product";
@@ -40,6 +35,3 @@ export function journeyText(e: AnalyticsEvent): [string, string] {
   if (e.event === "quick_view_cart") return ["Added to cart from quick view", product];
   return ["Clicked “What’s new”", `Saw “${e.variationName ?? "a variant"}”`];
 }
-
-/** All of one visitor's events, oldest first. */
-export const journeyOf = (events: AnalyticsEvent[], visitor: string): AnalyticsEvent[] => events.filter((x) => x.visitor === visitor).sort((a, b) => a.ts - b.ts);

@@ -9,7 +9,7 @@ import { fmt } from "@/lib/format";
 import type { StoreLast30 } from "@/types";
 
 /** The store with its five stops, the count at each, and a few of the people standing there. */
-export function StoreScene({ zones, idle }: Pick<StoreLast30, "zones" | "idle">) {
+export function StoreScene({ zones, idle, minutes }: Pick<StoreLast30, "zones" | "idle"> & { minutes: number }) {
   return (
     <>
       <div className="relative h-[230px] overflow-hidden rounded-[10px] border border-border bg-[linear-gradient(180deg,#F3F0FE_0%,#FAFAFD_72%)]">
@@ -44,7 +44,7 @@ export function StoreScene({ zones, idle }: Pick<StoreLast30, "zones" | "idle">)
         })}
       </div>
       <div className="mt-2.5 flex flex-wrap gap-4 text-xs text-text3">
-        <span>Each stop counts what people did in the last 30 minutes.</span>
+        <span>Each stop counts what people did in the last {minutes} minutes.</span>
         <span>Hover anyone to see what they were doing.</span>
       </div>
     </>

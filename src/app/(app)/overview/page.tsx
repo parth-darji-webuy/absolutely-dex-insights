@@ -6,6 +6,7 @@ import { PageHeading } from "@/components/shell/PageHeading";
 import { Card } from "@/components/ui/Card";
 import { CardSlot } from "@/components/ui/CardSlot";
 import { Kpi } from "@/components/ui/Kpi";
+import { getEnv } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -32,7 +33,7 @@ export default function Page() {
         </CardSlot>
       </div>
 
-      <CardSlot title="Store · last 30 minutes" delay={80}>
+      <CardSlot title={`Store · last ${getEnv().STORE_REFRESH_MINUTES} minutes`} delay={80}>
         <StoreCard />
       </CardSlot>
 

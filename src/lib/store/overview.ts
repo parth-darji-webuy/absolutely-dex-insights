@@ -82,13 +82,13 @@ const ZONES: { k: ZoneKey; x: number; icon: Zone["icon"]; label: string; src: Ev
   { k: "cart", x: 90, icon: "bag", label: "added to cart", src: "add_to_cart" },
 ];
 const PROPS: IdleVisitor["prop"][] = ["", "phone", "glass", "bag"];
-const MINUTES = 30;
 
-/** What people did in the last 30 minutes, stop by stop. */
+/** What people did in the last STORE_REFRESH_MINUTES minutes, stop by stop. */
 export async function loadStoreLast30(now: Date = new Date()): Promise<StoreLast30> {
+  const MINUTES = getEnv().STORE_REFRESH_MINUTES;
   const since = new Date(now.getTime() - MINUTES * 60_000);
   const exps = await loadExperiments(now);
-  const [{ rows, visitors }, recent] = await Promise.all([
+  const [{ rows, visitors, exposures }, recent] = await Promise.all([
     runQuery(async (tx) => {
       const rows = await tx.$queryRaw<{ src: EventType; aid: string }[]>`
         SELECT src, aid FROM (
@@ -107,7 +107,8 @@ export async function loadStoreLast30(now: Date = new Date()): Promise<StoreLast
           UNION ALL SELECT c."anonymousId" FROM whats_new_tracking c WHERE c."createdAt" >= ${since}
           UNION ALL SELECT c."anonymousId" FROM quick_view_cart_events c WHERE c."createdAt" >= ${since}
         ) u`;
-      return { rows, visitors: num(counted?.n) };
+      const [exposed] = await tx.$queryRaw<{ n: bigint }[]>`SELECT COUNT(*) AS n FROM experiment_tracking WHERE "createdAt" >= ${since} AND "createdAt" <= ${now}`;
+      return { rows, visitors: num(counted?.n), exposures: num(exposed?.n) };
     }),
     loadRecent(exps.filter((e) => e.status === "Running").map((e) => e.key), MINUTES, now),
   ]);
@@ -116,5 +117,5 @@ export async function loadStoreLast30(now: Date = new Date()): Promise<StoreLast
   const idle: IdleVisitor[] = ZONES.flatMap((z) =>
     [...new Set(rows.filter((r) => r.src === z.src).map((r) => r.aid))].slice(0, 3).map((aid, i): IdleVisitor => ({ zone: z.k, x: Math.min(98, z.x + (i - 1) * 4), prop: PROPS[(aid.charCodeAt(0) + i) % PROPS.length], seed: aid })),
   );
-  return { minutes: MINUTES, visitors, zones, idle, recent };
+  return { minutes: MINUTES, from: since.getTime(), to: now.getTime(), visitors, exposures, zones, idle, recent };
 }

@@ -4,6 +4,7 @@ import { dailyPeople, daysBetween, eachDay, hms, niceDate, presetRange, rangeErr
 
 // Expected values were produced by running the prototype's own helpers with "today" = 28 Oct 2026.
 const today = new Date(2026, 9, 28, 12);
+const start = new Date(2026, 8, 1);
 const d = (y: number, m: number, day: number) => new Date(y, m, day);
 
 describe("dates", () => {
@@ -28,11 +29,11 @@ describe("dates", () => {
   });
 
   it("rangeError explains what is wrong, or returns an empty string", () => {
-    expect(rangeError(null, null, today)).toBe("Choose both a From and a To date.");
-    expect(rangeError(d(2026, 9, 5), d(2026, 9, 1), today)).toBe("The From date must be on or before the To date.");
-    expect(rangeError(d(2026, 9, 1), d(2026, 10, 3), today)).toBe("The To date can’t be in the future.");
-    expect(rangeError(d(2026, 7, 1), d(2026, 9, 1), today)).toBe("Data starts on 01 Sep 2026. Pick a later From date.");
-    expect(rangeError(d(2026, 8, 1), d(2026, 9, 28), today)).toBe("");
+    expect(rangeError(null, null, today, start)).toBe("Choose both a From and a To date.");
+    expect(rangeError(d(2026, 9, 5), d(2026, 9, 1), today, start)).toBe("The From date must be on or before the To date.");
+    expect(rangeError(d(2026, 9, 1), d(2026, 10, 3), today, start)).toBe("The To date can’t be in the future.");
+    expect(rangeError(d(2026, 7, 1), d(2026, 9, 1), today, start)).toBe("Data starts on 01 Sep 2026. Pick a later From date.");
+    expect(rangeError(d(2026, 8, 1), d(2026, 9, 28), today, start)).toBe("");
   });
 
   it("eachDay lists every day across a month end", () => {

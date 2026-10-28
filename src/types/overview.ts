@@ -27,8 +27,14 @@ export type Zone = { k: ZoneKey; x: number; icon: "spark" | "search" | "moonS" |
 export type IdleVisitor = { zone: ZoneKey; x: number; prop: WalkerProp; seed: string };
 
 export type StoreLast30 = {
+  /** How many minutes the window covers (STORE_REFRESH_MINUTES). */
   minutes: number;
+  /** The window as milliseconds since 1970: worked out on the server when the numbers were read. */
+  from: number;
+  to: number;
   visitors: number;
+  /** People who entered any test in the window, counted once per test. */
+  exposures: number;
   zones: Zone[];
   idle: IdleVisitor[];
   recent: Record<string, RecentWindow>;

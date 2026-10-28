@@ -43,3 +43,16 @@ export type EventsPerMinute = {
   labels: string[];
   series: { key: EventType; name: string; color: string; values: number[] }[];
 };
+
+/** One event row in full: the row as stored, and the visitor's journey around it. */
+export type EventDetail = {
+  event: AnalyticsEvent;
+  /** Every column of the row, as the table holds it. */
+  row: Record<string, unknown>;
+  journey: {
+    /** Oldest first. */
+    steps: AnalyticsEvent[];
+    /** How many older steps are not shown. */
+    earlier: number;
+  };
+};

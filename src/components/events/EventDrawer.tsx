@@ -1,17 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { useToast } from "@/components/ui/Toast";
-import { journeyOf, journeyText, storedRow, VARIANT_SOURCE } from "@/lib/events";
+import { journeyText, VARIANT_SOURCE } from "@/lib/events";
 import { clock } from "@/lib/format";
-import type { AnalyticsEvent, EventMeta, EventType } from "@/types";
+import { Skeleton } from "@/components/ui/Skeleton";
+import type { AnalyticsEvent, EventDetail, EventMeta, EventType } from "@/types";
 import { EventName } from "./EventName";
 
 type Props = {
   event: AnalyticsEvent | null;
-  events: AnalyticsEvent[];
   meta: Record<EventType, EventMeta>;
   open: boolean;
   onClose: () => void;
@@ -52,7 +54,7 @@ function VariantNotice({ type }: { type: EventType }) {
   );
 }
 
-function Json({ row }: { row: Record<string, string | number | boolean | null> }) {
+function Json({ row }: { row: Record<string, unknown> }) {
   const entries = Object.entries(row);
   return (
     <pre className="json">
@@ -61,7 +63,7 @@ function Json({ row }: { row: Record<string, string | number | boolean | null> }
         <span key={k}>
           {"  "}
           <span className="k">&quot;{k}&quot;</span>:{" "}
-          {v === null ? <span className="text-text3">null</span> : typeof v === "string" ? <span className="s">&quot;{v}&quot;</span> : <span className="n">{String(v)}</span>}
+          {v === null || v === undefined ? <span className="text-text3">null</span> : typeof v === "string" ? <span className="s">&quot;{v}&quot;</span> : <span className="n">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>}
           {i < entries.length - 1 ? ",\n" : "\n"}
         </span>
       ))}
@@ -69,6 +71,8 @@ function Json({ row }: { row: Record<string, string | number | boolean | null> }
     </pre>
   );
 }
+
+type Loaded = { key: string; state: "ready"; data: EventDetail } | { key: string; state: "missing" | "error" };
 
 async function copyText(text: string): Promise<boolean> {
   try {
@@ -91,15 +95,49 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
+function Problem({ missing, onRetry }: { missing: boolean; onRetry: () => void }) {
+  return (
+    <div className="notice !justify-between" role="alert">
+      <span>{missing ? "This row is no longer in the database." : "Couldn’t load the details."}</span>
+      {!missing && (
+        <Button size="sm" onClick={onRetry}>
+          Retry
+        </Button>
+      )}
+    </div>
+  );
+}
+
 const H4 = ({ children }: { children: React.ReactNode }) => <h4 className="mb-2.5 text-xs font-semibold tracking-[.06em] text-text3 uppercase">{children}</h4>;
 
-export function EventDrawer({ event: e, events, meta, open, onClose, onSeeQuickView }: Props) {
+export function EventDrawer({ event: e, meta, open, onClose, onSeeQuickView }: Props) {
   const { toast } = useToast();
-  const steps = e ? journeyOf(events, e.visitor) : [];
+  const router = useRouter();
+  const [loaded, setLoaded] = useState<Loaded | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const key = e ? `${e.table}/${e.rowId}/${attempt}` : "";
+
+  // Ask the server for the row as stored and the visitor's journey whenever a row is opened.
+  useEffect(() => {
+    if (!open || !e) return;
+    const ctl = new AbortController();
+    fetch(`/api/events/detail?tbl=${encodeURIComponent(e.table)}&id=${encodeURIComponent(e.rowId)}`, { cache: "no-store", signal: ctl.signal })
+      .then(async (res) => {
+        if (res.status === 401) return router.push("/sign-in");
+        if (res.status === 404) return setLoaded({ key, state: "missing" });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        setLoaded({ key, state: "ready", data: (await res.json()) as EventDetail });
+      })
+      .catch((err) => err?.name !== "AbortError" && setLoaded({ key, state: "error" }));
+    return () => ctl.abort();
+  }, [open, e, key, router]);
+
+  const current = loaded?.key === key ? loaded : null;
+  const detail = current?.state === "ready" ? current.data : null;
 
   const copy = async () => {
-    if (!e) return;
-    const ok = await copyText(JSON.stringify(storedRow(e), null, 2));
+    if (!detail) return;
+    const ok = await copyText(JSON.stringify(detail.row, null, 2));
     if (ok) toast("Payload copied as JSON");
     else toast("Couldn’t copy. Select the text and copy it by hand.", "warn");
   };
@@ -121,21 +159,33 @@ export function EventDrawer({ event: e, events, meta, open, onClose, onSeeQuickV
         <>
           <div>
             <H4>Visitor journey</H4>
-            <div className="journey">
-              {steps.map((s) => {
-                const [t, sub] = journeyText(s);
-                return (
-                  <div key={s.id} className={`jstep ${s.id === e.id ? "cur" : ""}`} style={{ "--c": meta[s.event]?.c ?? "var(--text3)" } as React.CSSProperties}>
-                    <span className="jd" />
-                    <div>
-                      <b>{t}</b>
-                      {sub && <p>{sub}</p>}
+            {detail ? (
+              <div className="journey">
+                {detail.journey.earlier > 0 && <p className="pb-1 pl-7 text-xs text-text3">and {detail.journey.earlier} earlier</p>}
+                {detail.journey.steps.map((s) => {
+                  const [t, sub] = journeyText(s);
+                  const cur = s.rowId === e.rowId && s.table === e.table;
+                  return (
+                    <div key={`${s.table}/${s.rowId}`} className={`jstep ${cur ? "cur" : ""}`} style={{ "--c": meta[s.event]?.c ?? "var(--text3)" } as React.CSSProperties}>
+                      <span className="jd" />
+                      <div>
+                        <b>{t}</b>
+                        {sub && <p>{sub}</p>}
+                      </div>
+                      <span className="t">{clock(s.ts)}</span>
                     </div>
-                    <span className="t">{clock(s.ts)}</span>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : current ? (
+              <Problem missing={current.state === "missing"} onRetry={() => setAttempt((n) => n + 1)} />
+            ) : (
+              <div className="flex flex-col gap-3" aria-busy="true">
+                <Skeleton w="70%" h={14} />
+                <Skeleton w="55%" h={14} />
+                <Skeleton w="62%" h={14} />
+              </div>
+            )}
           </div>
           {e.event === "quick_view_clicked" && (
             <div className="notice !justify-between">
@@ -150,10 +200,10 @@ export function EventDrawer({ event: e, events, meta, open, onClose, onSeeQuickV
           <VariantNotice type={e.event} />
           <div>
             <H4>Row as stored</H4>
-            <Json row={storedRow(e)} />
+            {detail ? <Json row={detail.row} /> : current ? null : <Skeleton w="100%" h={120} />}
           </div>
           <div>
-            <Button onClick={copy}>
+            <Button onClick={copy} disabled={!detail}>
               <Icon name="copy" /> Copy JSON
             </Button>
           </div>

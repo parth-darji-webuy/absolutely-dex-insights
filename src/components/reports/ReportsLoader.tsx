@@ -1,4 +1,5 @@
-import { ADMIN } from "@/config/accounts";
+import { getEnv } from "@/lib/env";
+import { localDay } from "@/lib/tz";
 import { experiments } from "@/lib/queries";
 import { ReportsPanel } from "./ReportsPanel";
 
@@ -8,7 +9,8 @@ export async function ReportsLoader() {
   return (
     <ReportsPanel
       experiments={list.map(({ key, name, flag, metricShort, mtable, status, start }) => ({ key, name, flag, metricShort, mtable, status, start }))}
-      generatedBy={`${ADMIN.name} (${ADMIN.role})`}
+      today={localDay(new Date(), getEnv().INSIGHTS_TIMEZONE)}
+      trackingStart={getEnv().TRACKING_START}
     />
   );
 }

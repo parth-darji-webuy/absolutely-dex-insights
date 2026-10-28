@@ -41,3 +41,17 @@ export const weekdayOf = (key: string): number => {
   const [y, m, d] = key.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 };
+
+/** "Asia/Kolkata (UTC+05:30)" for `date` in time zone `tz`. */
+export function tzLabel(date: Date, tz: string): string {
+  const raw = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longOffset" }).formatToParts(date).find((p) => p.type === "timeZoneName")?.value ?? "GMT";
+  const offset = raw === "GMT" ? "+00:00" : raw.replace("GMT", "").replace("−", "-");
+  return `${tz} (UTC${offset})`;
+}
+
+/** "28 Oct 2026, 09:05:03" for `date` on the clock of time zone `tz`. */
+export function stamp(date: Date, tz: string): string {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(date);
+  const g = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${g("day")} ${g("month")} ${g("year")}, ${g("hour")}:${g("minute")}:${g("second")}`;
+}

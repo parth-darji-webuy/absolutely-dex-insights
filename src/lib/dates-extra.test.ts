@@ -13,6 +13,6 @@ describe("parseYMD", () => {
 
 describe("the Last month preset, with today on 28 Oct 2026", () => {
   it("is a valid period", () => {
-    expect(rangeError(new Date(2026, 8, 1), new Date(2026, 8, 30), new Date(2026, 9, 28))).toBe("");
+    expect(rangeError(new Date(2026, 8, 1), new Date(2026, 8, 30), new Date(2026, 9, 28), new Date(2026, 8, 1))).toBe("");
   });
 });

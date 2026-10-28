@@ -19,12 +19,6 @@ export const todayStart = () => dayStart(new Date());
 /** Longest period one download can cover. */
 export const RANGE_MAX = 366;
 
-/** Tracking began on 1 Sep 2026 (or 90 days ago, if that is earlier than today's window). */
-export const trackStart = (today: Date) => {
-  const t = new Date(2026, 8, 1);
-  return t < today ? t : addDays(today, -90);
-};
-
 /** Days from a to b, counting both ends. */
 export const daysBetween = (a: Date, b: Date): number => Math.round((dayStart(b).getTime() - dayStart(a).getTime()) / DAY) + 1;
 
@@ -40,12 +34,13 @@ export function presetRange(k: PresetKey, today: Date = todayStart()): [Date, Da
 }
 
 /** The message to show under the date pickers, or "" when the period is fine. */
-export function rangeError(from: Date | null, to: Date | null, today: Date = todayStart()): string {
+export function rangeError(from: Date | null, to: Date | null, today: Date, trackingStart: Date): string {
   const t = dayStart(today);
+  const start = dayStart(trackingStart);
   if (!from || !to) return "Choose both a From and a To date.";
   if (from > to) return "The From date must be on or before the To date.";
   if (to > t) return "The To date can’t be in the future.";
-  if (from < trackStart(t)) return `Data starts on ${niceDate(trackStart(t))}. Pick a later From date.`;
+  if (from < start) return `Data starts on ${niceDate(start)}. Pick a later From date.`;
   if (daysBetween(from, to) > RANGE_MAX) return `A download covers at most ${RANGE_MAX} days. Shorten the period.`;
   return "";
 }
@@ -78,16 +73,4 @@ export function parseYMD(s: string | null | undefined): Date | null {
   if (!m) return null;
   const d = new Date(+m[1], +m[2] - 1, +m[3]);
   return ymd(d) === s ? d : null;
-}
-
-/** "Europe/London (UTC+01:00)" */
-export function tzLabel(d: Date = new Date()): string {
-  let name = "Local time";
-  try {
-    name = Intl.DateTimeFormat().resolvedOptions().timeZone || name;
-  } catch {
-    // keep the fallback
-  }
-  const off = -d.getTimezoneOffset();
-  return `${name} (UTC${off >= 0 ? "+" : "−"}${pad2(Math.floor(Math.abs(off) / 60))}:${pad2(Math.abs(off) % 60)})`;
 }

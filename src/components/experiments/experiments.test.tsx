@@ -75,13 +75,13 @@ describe("Overview pieces", () => {
   const store = { zones: ZONES, idle: IDLE };
 
   it("draws the five stops", () => {
-    const out = html(<StoreScene {...store} />);
+    const out = html(<StoreScene zones={store.zones} idle={store.idle} minutes={30} />);
     for (const z of ZONES) expect(out).toContain(z.label);
     expect(out).not.toMatch(BAD);
   });
 
   it("draws an empty store without breaking", () => {
-    expect(html(<StoreScene zones={[]} idle={[]} />)).not.toMatch(BAD);
+    expect(html(<StoreScene zones={[]} idle={[]} minutes={30} />)).not.toMatch(BAD);
   });
 
   it("shows each running test's last 30 minutes, with zeros when it has none", () => {

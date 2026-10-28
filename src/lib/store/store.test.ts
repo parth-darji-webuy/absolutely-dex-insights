@@ -18,7 +18,8 @@ vi.mock("../db", () => ({
       $executeRaw: async () => 0,
     }),
 }));
-vi.mock("../env", () => ({ getEnv: () => ({ INSIGHTS_TIMEZONE: "UTC", GROWTHBOOK_API_HOST: "https://x.example", GROWTHBOOK_CLIENT_KEY: "sdk-test" }) }));
+let minutes = 30;
+vi.mock("../env", () => ({ getEnv: () => ({ INSIGHTS_TIMEZONE: "UTC", STORE_REFRESH_MINUTES: minutes, GROWTHBOOK_API_HOST: "https://x.example", GROWTHBOOK_CLIENT_KEY: "sdk-test" }) }));
 let gb: { flags: string[]; experiments: { key: string; flag: string; values: string[]; names: (string | undefined)[]; name?: string }[] } | null = null;
 vi.mock("./growthbook", () => ({ getGrowthBook: async () => gb }));
 
@@ -28,6 +29,8 @@ const { loadEvents } = await import("./events");
 const { loadProducts, jsonList } = await import("./products");
 const { loadOverview } = await import("./overview");
 const { loadReportRows } = await import("./reports");
+const { loadStoreLast30 } = await import("./overview");
+const { loadEventDetail, JOURNEY_MAX } = await import("./events");
 
 const NOW = new Date("2026-10-29T10:00:00Z");
 const BAD = /NaN|undefined|Infinity/;
@@ -35,6 +38,7 @@ const BAD = /NaN|undefined|Infinity/;
 beforeEach(() => {
   answer = () => [];
   gb = null;
+  minutes = 30;
   sent.length = 0;
 });
 
@@ -190,5 +194,83 @@ describe("overview", () => {
     expect(o.visitors).toEqual([0, 0, 0, 0, 0, 2, 1]);
     expect(o.visitorsPrevWeek).toBe(1);
     expect(o.daily.theme_toggle.at(-1)).toBe(1);
+  });
+});
+
+describe("store card", () => {
+  it("covers STORE_REFRESH_MINUTES, and says exactly which window it is", async () => {
+    minutes = 45;
+    const s = await loadStoreLast30(NOW);
+    expect(s.minutes).toBe(45);
+    expect(s.to - s.from).toBe(45 * 60_000);
+    expect(s.to).toBe(NOW.getTime());
+    expect(s.exposures).toBe(0);
+  });
+
+  it("counts people at each stop, exposures and per-minute people with empty minutes as 0", async () => {
+    answer = (sql, values) => {
+      if (sql.includes("GROUP BY 1, 2, 7")) return [{ key: "qv", vid: 0, vname: "C", vvalue: "false", flag: "f", ename: "QV", day: "2026-10-29", people: 5 }];
+      if (sql.includes("FLOOR(EXTRACT(EPOCH")) return [{ key: "qv", vid: 0, ago: 2, people: 3 }, { key: "qv", vid: 1, ago: 0, people: 1 }];
+      if (sql.includes("SELECT src, aid")) return [{ src: "add_to_cart", aid: "a" }, { src: "add_to_cart", aid: "a" }, { src: "add_to_cart", aid: "b" }, { src: "theme_toggle", aid: "c" }];
+      if (sql.includes("COUNT(DISTINCT aid)")) return [{ n: 3 }];
+      if (sql.includes("FROM experiment_tracking WHERE \"createdAt\" >=") && !sql.includes("GROUP")) return [{ n: 4 }];
+      return values.length ? [] : [];
+    };
+    minutes = 5;
+    const s = await loadStoreLast30(NOW);
+    expect(s.visitors).toBe(3);
+    expect(s.exposures).toBe(4);
+    expect(Object.fromEntries(s.zones.map((z) => [z.k, z.n]))).toEqual({ whatsnew: 0, browse: 0, theme: 1, quick: 0, cart: 2 });
+    expect(s.recent.qv.mins).toEqual([0, 0, 3, 0, 1]);
+    expect(s.recent.qv.c[0]).toBe(3);
+    expect(s.recent.qv.t[0]).toBe(1);
+    expect(JSON.stringify(s)).not.toMatch(BAD);
+  });
+});
+
+describe("event detail", () => {
+  const at = (s: string) => new Date(s);
+  const cart = (id: string, when: string) => ({ id, anonymousId: "v1", createdAt: at(when), productId: "p1", productName: "Watch", slug: "w", brand: "B", price: 520, quantity: 1, selectedSize: null, selectedColor: null });
+
+  it("is null when there is no such row in that table", async () => {
+    expect(await loadEventDetail("add_to_cart_tracking", "nope")).toBeNull();
+  });
+
+  it("returns the stored row and the visitor's journey, oldest first", async () => {
+    const target = cart("c2", "2026-10-29T09:02:00Z");
+    answer = (sql, values) => {
+      const idFilter = values.includes("c2") && !sql.includes("COUNT(*)");
+      if (sql.includes("FROM add_to_cart_tracking\n      WHERE")) return idFilter && values.length < 8 ? [target] : [target, cart("c1", "2026-10-29T09:00:00Z")];
+      if (sql.includes("SUM(n)")) return [{ n: 2 }];
+      if (sql.includes("row_to_json")) return [{ row: '{"id":"c2","anonymousId":"v1","createdAt":"2026-10-29T09:02:00"}' }];
+      return [];
+    };
+    const d = await loadEventDetail("add_to_cart_tracking", "c2");
+    expect(d?.event).toMatchObject({ rowId: "c2", table: "add_to_cart_tracking", product: "Watch" });
+    expect(d?.row).toEqual({ id: "c2", anonymousId: "v1", createdAt: "2026-10-29T09:02:00Z" });
+    expect(Object.keys(d?.row ?? {})).toEqual(["id", "anonymousId", "createdAt"]);
+    expect(d?.journey.steps.map((s) => s.rowId)).toEqual(["c1", "c2"]);
+    expect(d?.journey.earlier).toBe(0);
+  });
+
+  it("shows at most 100 steps and counts the earlier ones", async () => {
+    const many = Array.from({ length: JOURNEY_MAX + 1 }, (_, i) => cart(`c${i}`, new Date(Date.UTC(2026, 9, 29, 0, i)).toISOString()));
+    const target = many[many.length - 1];
+    answer = (sql, values) => {
+      if (sql.includes("FROM add_to_cart_tracking\n      WHERE")) return values.includes(target.id) && values.length < 8 ? [target] : many.slice().reverse();
+      if (sql.includes("SUM(n)")) return [{ n: 130 }];
+      if (sql.includes("row_to_json")) return [{ row: "{}" }];
+      return [];
+    };
+    const d = await loadEventDetail("add_to_cart_tracking", target.id);
+    expect(d?.journey.steps).toHaveLength(JOURNEY_MAX);
+    expect(d?.journey.earlier).toBe(30);
+    expect(d?.journey.steps.at(-1)?.rowId).toBe(target.id);
+  });
+
+  it("sends the six table names as written SQL and nothing that writes", async () => {
+    answer = () => [];
+    await loadEventDetail("whats_new_tracking", "x");
+    expect(sent.every((s) => !/\b(DELETE|INSERT|UPDATE|DROP|ALTER|TRUNCATE)\b/i.test(s))).toBe(true);
   });
 });

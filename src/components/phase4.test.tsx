@@ -101,7 +101,7 @@ describe("Ask page", () => {
 describe("Reports page", () => {
   it("shows the period card and a Download CSV button per experiment", () => {
     const exps = [{ key: "add-to-cart", name: "Add to Cart button text", flag: "add-to-cart-btn", metricShort: "added to cart", mtable: "add_to_cart_tracking", status: "Running", start: "Oct 6, 2026" }];
-    const m = html(<ReportsPanel experiments={exps} generatedBy="Designer Exchange (Admin)" />);
+    const m = html(<ReportsPanel experiments={exps} today="2026-10-29" trackingStart="2026-09-01" />);
     expect(m).toContain("Period and experiment");
     expect(m).toContain("Last month");
     expect(m).toContain("Download CSV");

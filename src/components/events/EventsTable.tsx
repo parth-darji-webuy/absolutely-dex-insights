@@ -91,7 +91,6 @@ export function EventsTable({ events, meta, qv, weekLabel }: Props) {
       </Card>
       <EventDrawer
         event={selected}
-        events={events}
         meta={meta}
         open={open}
         onClose={() => setOpen(false)}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayLabel, daysFromTo, lastDays, localDay, shiftDay, startLabel, weekdayOf } from "./tz";
+import { dayLabel, daysFromTo, lastDays, localDay, shiftDay, stamp, startLabel, tzLabel, weekdayOf } from "./tz";
 
 describe("days in a time zone", () => {
   it("puts the same moment on different days in different zones", () => {
@@ -25,5 +25,16 @@ describe("days in a time zone", () => {
     expect(dayLabel("2026-10-21")).toBe("Oct 21");
     expect(startLabel("2026-10-21")).toBe("Oct 21, 2026");
     expect(weekdayOf("2026-10-21")).toBe(3);
+  });
+});
+
+describe("report stamps", () => {
+  it("shows the clock and the offset of the store's time zone", () => {
+    const d = new Date("2026-10-28T23:30:00Z");
+    expect(stamp(d, "UTC")).toBe("28 Oct 2026, 23:30:00");
+    expect(stamp(d, "Asia/Kolkata")).toBe("29 Oct 2026, 05:00:00");
+    expect(tzLabel(d, "Asia/Kolkata")).toBe("Asia/Kolkata (UTC+05:30)");
+    expect(tzLabel(d, "America/New_York")).toBe("America/New_York (UTC-04:00)");
+    expect(tzLabel(d, "UTC")).toBe("UTC (UTC+00:00)");
   });
 });

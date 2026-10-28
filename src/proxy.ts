@@ -6,6 +6,8 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const user = await verifySession(request.cookies.get(SESSION_COOKIE)?.value, process.env.SESSION_SECRET);
 
+  // Pages send signed-out visitors to the sign-in page; the API answers 401 so the page can do that itself.
+  if (!user && pathname.startsWith("/api/")) return NextResponse.json({ error: "Not signed in." }, { status: 401, headers: { "Cache-Control": "no-store" } });
   if (!user && pathname !== "/sign-in") return NextResponse.redirect(new URL("/sign-in", request.url));
   if (user && pathname === "/sign-in") return NextResponse.redirect(new URL("/overview", request.url));
   return NextResponse.next();

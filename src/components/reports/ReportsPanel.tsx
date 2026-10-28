@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { periodSummary, type PeriodSummary, reportRowsFor } from "@/app/(app)/reports/actions";
+import { useRouter } from "next/navigation";
+import { periodSummary, type PeriodSummary } from "@/app/(app)/reports/actions";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -9,9 +10,9 @@ import { Chip } from "@/components/ui/Chip";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useToast } from "@/components/ui/Toast";
-import { daysBetween, niceDate, type PresetKey, parseYMD, presetRange, rangeError, todayStart, trackStart, ymd } from "@/lib/dates";
+import { daysBetween, niceDate, type PresetKey, parseYMD, presetRange, rangeError, ymd } from "@/lib/dates";
 import { fmt } from "@/lib/format";
-import { buildReport, downloadCSV } from "@/lib/report";
+import { downloadBlob } from "@/lib/report";
 
 export type ReportExperiment = { key: string; name: string; flag: string; metricShort: string; mtable: string; status: string; start: string };
 
@@ -25,10 +26,13 @@ const PRESETS: [PresetKey, string][] = [
 const code = "rounded-[5px] border border-border bg-card2 px-1.5 py-px text-[11px] text-text2";
 
 /** The Period card and the Experiment reports card. One period and one experiment choice for every download. */
-export function ReportsPanel({ experiments, generatedBy }: { experiments: ReportExperiment[]; generatedBy: string }) {
+export function ReportsPanel({ experiments, today, trackingStart }: { experiments: ReportExperiment[]; /** Today in the store's time zone, YYYY-MM-DD. */ today: string; /** TRACKING_START, YYYY-MM-DD. */ trackingStart: string }) {
   const { toast } = useToast();
+  const router = useRouter();
+  const todayDate = parseYMD(today) ?? new Date();
+  const startDate = parseYMD(trackingStart) ?? todayDate;
   const [preset, setPreset] = useState<PresetKey | "custom">("7d");
-  const [range, setRange] = useState<[Date | null, Date | null]>(() => presetRange("7d") ?? [null, null]);
+  const [range, setRange] = useState<[Date | null, Date | null]>(() => presetRange("7d", todayDate) ?? [null, null]);
   const [exp, setExp] = useState("all");
   const [loaded, setLoaded] = useState<{ id: string; data: Record<string, PeriodSummary> } | null>(null);
   const [failedId, setFailedId] = useState<string | null>(null);
@@ -36,7 +40,7 @@ export function ReportsPanel({ experiments, generatedBy }: { experiments: Report
   const latest = useRef(0);
 
   const [from, to] = range;
-  const err = rangeError(from, to);
+  const err = rangeError(from, to, todayDate, startDate);
   const n = from && to ? daysBetween(from, to) : 0;
   const shown = experiments.filter((e) => exp === "all" || e.key === exp);
   const fromStr = from ? ymd(from) : "";
@@ -57,24 +61,29 @@ export function ReportsPanel({ experiments, generatedBy }: { experiments: Report
 
   const pick = (k: PresetKey) => {
     setPreset(k);
-    setRange(presetRange(k) ?? [null, null]);
+    setRange(presetRange(k, todayDate) ?? [null, null]);
   };
   const setDate = (which: 0 | 1, value: string) => {
     setPreset("custom");
     setRange((r) => (which === 0 ? [parseYMD(value), r[1]] : [r[0], parseYMD(value)]));
   };
 
+  // The file comes from the server, which checks the period again with the same rules.
   const download = async (e: ReportExperiment) => {
     if (err || !from || !to || busy) return;
     setBusy(e.key);
     try {
-      const rows = await reportRowsFor(e.key, ymd(from), ymd(to));
-      const rep = buildReport(e, rows, from, to, generatedBy);
-      if (!rep.rows.length) toast(`${rep.name}: nothing in this period`, "info");
-      else {
-        downloadCSV(rep.file, [...rep.meta, [], rep.head, ...rep.rows]);
-        toast(`${rep.name}: ${fmt(rep.rows.length)} rows downloaded`);
+      const res = await fetch(`/api/reports/experiment?${new URLSearchParams({ key: e.key, from: ymd(from), to: ymd(to) })}`, { cache: "no-store" });
+      if (res.status === 401) return router.push("/sign-in");
+      if (!res.ok) {
+        const { error } = (await res.json().catch(() => ({}))) as { error?: string };
+        toast(res.status === 404 ? `${e.name} · daily results: ${(error ?? "nothing in this period").replace(/^Not/, "not")}` : (error ?? "The download didn’t work. Try again."), res.status === 404 ? "info" : "warn");
+        return;
       }
+      const name = decodeURIComponent(res.headers.get("X-Report-Name") ?? `${e.name} · daily results`);
+      const file = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? `absolutelydex_${e.key}-daily_${ymd(from)}_to_${ymd(to)}.csv`;
+      downloadBlob(file, await res.blob());
+      toast(`${name}: ${fmt(Number(res.headers.get("X-Report-Rows") ?? 0))} rows downloaded`);
     } catch {
       toast("The download didn’t work. Try again.", "warn");
     } finally {
@@ -82,9 +91,8 @@ export function ReportsPanel({ experiments, generatedBy }: { experiments: Report
     }
   };
 
-  const today = todayStart();
-  const min = ymd(trackStart(today));
-  const max = ymd(today);
+  const min = trackingStart;
+  const max = today;
 
   const inPeriod = (e: ReportExperiment) => {
     if (err) return { text: <span className="text-text3">—</span>, days: 0 };

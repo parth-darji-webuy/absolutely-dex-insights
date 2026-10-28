@@ -7,3 +7,8 @@ export const TRACKING_TABLES = [
   "whats_new_tracking",
   "theme_toggle_tracking",
 ] as const;
+
+export type TrackingTable = (typeof TRACKING_TABLES)[number];
+
+/** True when `value` is exactly one of the six tracking tables. */
+export const isTrackingTable = (value: unknown): value is TrackingTable => typeof value === "string" && (TRACKING_TABLES as readonly string[]).includes(value);

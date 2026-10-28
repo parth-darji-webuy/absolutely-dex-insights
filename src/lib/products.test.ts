@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CATS, PRODUCTS, QV } from "@/mocks";
+import { CATS, PRODUCTS, QV } from "@/test/fixtures";
 import { addRate, coldProducts, heat, ofOpened, overallRate, quickViewInsight } from "./products";
 
 describe("product maths", () => {

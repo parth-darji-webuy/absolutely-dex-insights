@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Delta } from "@/components/ui/Delta";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PRODUCTS } from "@/mocks";
+import { PRODUCTS } from "@/test/fixtures";
 import { AreaChart, BarChart, Donut, HBars, LiftRange, MiniBars, ProductScatter, Sparkline, XSpark } from ".";
 
 const BAD = /NaN|undefined|Infinity/;

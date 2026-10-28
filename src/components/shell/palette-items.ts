@@ -16,10 +16,10 @@ export type PaletteExperiment = { key: string; name: string; desc: string; statu
 const askHref = (q: string) => `/ask?q=${encodeURIComponent(q.trim())}`;
 
 /** What the ⌘K list shows for a search: ask, suggested questions, pages, then experiments. */
-export function paletteItems(query: string, experiments: PaletteExperiment[], suggestions: string[]): PaletteItem[] {
+export function paletteItems(query: string, experiments: PaletteExperiment[], suggestions: string[], aiEnabled = true): PaletteItem[] {
   const q = query.trim().toLowerCase();
-  const ask: PaletteItem[] = q ? [{ group: "Ask AI", label: `Ask: “${query.trim()}”`, icon: "spark", hint: "↵", href: askHref(query) }] : [];
-  const pages: PaletteItem[] = [...PAGES, { id: "ask", label: "Ask your data", icon: "spark" as IconName }].map((p) => ({
+  const ask: PaletteItem[] = q && aiEnabled ? [{ group: "Ask AI", label: `Ask: “${query.trim()}”`, icon: "spark", hint: "↵", href: askHref(query) }] : [];
+  const pages: PaletteItem[] = [...PAGES, ...(aiEnabled ? [{ id: "ask", label: "Ask your data", icon: "spark" as IconName }] : [])].map((p) => ({
     group: "Go to",
     label: p.label,
     icon: p.icon,
@@ -33,7 +33,7 @@ export function paletteItems(query: string, experiments: PaletteExperiment[], su
     find: `${e.desc} ${e.key}`,
     href: `/experiments/${e.key}`,
   }));
-  const sugg: PaletteItem[] = suggestions.map((s) => ({ group: "Suggested questions", label: s, icon: "search", href: askHref(s) }));
+  const sugg: PaletteItem[] = (aiEnabled ? suggestions : []).map((s) => ({ group: "Suggested questions", label: s, icon: "search", href: askHref(s) }));
   const match = (it: PaletteItem) => !q || it.label.toLowerCase().includes(q) || (it.hint ?? "").toLowerCase().includes(q) || (it.find ?? "").toLowerCase().includes(q);
   return [...ask, ...(q ? [] : sugg), ...pages.filter(match), ...exps.filter(match), ...(q ? sugg.filter(match) : [])];
 }

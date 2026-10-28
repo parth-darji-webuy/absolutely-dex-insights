@@ -10,15 +10,16 @@ import { type PaletteExperiment, paletteItems } from "./palette-items";
 import { usePalette } from "./PaletteProvider";
 
 type Props = { experiments: PaletteExperiment[]; suggestions: string[] };
+type InnerProps = Props & { aiEnabled: boolean };
 
 /** ⌘K: ask a question, jump to a page, jump to an experiment. Arrows, Enter and Escape. */
 export function CommandPalette({ experiments, suggestions }: Props) {
-  const { open, hide } = usePalette();
+  const { open, hide, aiEnabled } = usePalette();
   if (!open || typeof document === "undefined") return null;
-  return createPortal(<Palette experiments={experiments} suggestions={suggestions} onClose={hide} />, document.body);
+  return createPortal(<Palette experiments={experiments} suggestions={suggestions} aiEnabled={aiEnabled} onClose={hide} />, document.body);
 }
 
-function Palette({ experiments, suggestions, onClose }: Props & { onClose: () => void }) {
+function Palette({ experiments, suggestions, aiEnabled, onClose }: InnerProps & { onClose: () => void }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [sel, setSel] = useState(0);
@@ -26,7 +27,7 @@ function Palette({ experiments, suggestions, onClose }: Props & { onClose: () =>
   const list = useRef<HTMLDivElement>(null);
   useDialog(box, true, onClose);
 
-  const items = useMemo(() => paletteItems(query, experiments, suggestions), [query, experiments, suggestions]);
+  const items = useMemo(() => paletteItems(query, experiments, suggestions, aiEnabled), [query, experiments, suggestions, aiEnabled]);
   const current = Math.min(sel, Math.max(0, items.length - 1));
 
   useEffect(() => {
@@ -66,7 +67,7 @@ function Palette({ experiments, suggestions, onClose }: Props & { onClose: () =>
               setSel(0);
             }}
             onKeyDown={onKeyDown}
-            placeholder="Ask about your data, e.g. Which product had the most add-to-carts yesterday?"
+            placeholder={aiEnabled ? "Ask about your data, e.g. Which product had the most add-to-carts yesterday?" : "Search pages and experiments"}
             autoComplete="off"
             spellCheck={false}
             role="combobox"
@@ -81,7 +82,7 @@ function Palette({ experiments, suggestions, onClose }: Props & { onClose: () =>
           {items.length === 0 && (
             <div className="flex min-h-[100px] flex-col items-center justify-center gap-1.5 px-4 py-[34px] text-center">
               <b className="text-sm font-semibold">No matches</b>
-              <p className="text-[13px] text-text2">Press Enter to ask AI instead.</p>
+              {aiEnabled && <p className="text-[13px] text-text2">Press Enter to ask AI instead.</p>}
             </div>
           )}
           {items.map((it, i) => {
@@ -107,7 +108,7 @@ function Palette({ experiments, suggestions, onClose }: Props & { onClose: () =>
         <div className="flex gap-3.5 border-t border-border px-3.5 py-[9px] text-[11.5px] text-text3">
           <span>↑↓ to move</span>
           <span>↵ to open</span>
-          <span>Type a question to ask AI</span>
+          {aiEnabled && <span>Type a question to ask AI</span>}
         </div>
       </div>
     </div>

@@ -152,20 +152,18 @@ function Insight({ cold, overall, total }: { cold: { name: string; views: number
 
 export async function FunnelCard() {
   const { qv } = await products();
-  const all = [
-    ["Saw quick view button", "Not tracked yet: sample", qv.seen],
+  // The store doesn't record who saw the Quick View button, so the funnel starts at "Opened quick view".
+  const steps = [
     ["Opened quick view", "quickview_tracking", qv.opened],
     ["Added to cart", "quick_view_cart_events", qv.add],
   ] as const;
-  // The store doesn't record who saw the button yet; without it the funnel starts at "Opened quick view".
-  const steps = qv.seen > 0 ? all : all.slice(1);
   const first = steps[0][2];
   const share = (n: number) => (first > 0 ? (n / first) * 100 : NaN);
-  const drops = steps.slice(1).map((_, k) => k + 1).map((i) => ({ i, lost: steps[i - 1][2] - steps[i][2], conv: steps[i - 1][2] > 0 ? (steps[i][2] / steps[i - 1][2]) * 100 : NaN }));
+  const drops = [1].map((i) => ({ i, lost: steps[i - 1][2] - steps[i][2], conv: steps[i - 1][2] > 0 ? (steps[i][2] / steps[i - 1][2]) * 100 : NaN }));
   const biggest = drops.reduce((a, b) => (a.lost >= b.lost ? a : b));
-  const flows = steps.length === 3 ? [7, 3, 1] : [3, 1];
+  const flows = [3, 1];
   return (
-    <Card title="Quick view funnel" subtitle="People this week, each step as a share of the one before" source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")], gap: qv.seen > 0 ? "Step 1 not tracked yet" : "Button views not tracked yet" }} delay={80}>
+    <Card title="Quick view funnel" subtitle="People this week, each step as a share of the one before" source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")], gap: "Button views not tracked yet" }} delay={80}>
       {first <= 0 ? (
         <EmptyState title="No quick view activity yet" text="The funnel fills in as people open the quick view." />
       ) : (
@@ -275,7 +273,7 @@ export function NotTrackedNote() {
     <div className="warnbar fade">
       <Icon name="info" />
       <span>
-        Product <b>views</b> and <b>quick view button views</b> aren’t tracked in your database yet, so those numbers are samples. Quick views and add-to-carts come from your tables.
+        Product <b>views</b> and <b>quick view button views</b> aren’t tracked in your database yet, so they aren’t shown. Quick views and add-to-carts come from your tables.
       </span>
     </div>
   );

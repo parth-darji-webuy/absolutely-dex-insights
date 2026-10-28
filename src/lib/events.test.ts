@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { generateEvents } from "@/mocks";
+import { makeEvents } from "@/test/fixtures";
 import { EVENT_TABLE, journeyText, VARIANT_SOURCE } from "./events";
 
-const events = generateEvents(Date.UTC(2026, 9, 28, 12));
+const events = makeEvents(Date.UTC(2026, 9, 28, 12));
 const hero = events.filter((e) => e.visitor === "kT9xQ2mLpA4w").sort((a, b) => a.ts - b.ts);
 
 describe("events", () => {

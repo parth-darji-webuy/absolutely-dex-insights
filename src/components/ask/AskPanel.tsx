@@ -5,37 +5,56 @@ import { type FormEvent, useCallback, useEffect, useRef, useState } from "react"
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { matchAnswer, type AnswerSet } from "@/lib/ask";
-import { AnswerCard, type AskItem } from "./AnswerCard";
+import type { Answer } from "@/types";
+import { AnswerCard, type AskBody, type AskItem } from "./AnswerCard";
 
-const THINK_MS = 1100;
+export const QUESTION_MAX = 300;
 
-type Props = { answers: AnswerSet; suggestions: string[]; initialQuestion?: string; startWith?: (keyof AnswerSet)[] };
+type Reply = { ok: true; answer: Answer } | { ok: false; kind: string; message: string };
+
+type Props = { suggestions: string[]; initialQuestion?: string };
+
+/** What a reply that is not an answer looks like on the page. */
+function noticeFor(kind: string, message: string): Extract<AskBody, { state: "notice" }> {
+  if (kind === "refused") return { state: "notice", title: message, tables: true };
+  if (kind === "busy") return { state: "notice", title: message, detail: "Nothing was lost. Ask again in a minute." };
+  if (kind === "rate") return { state: "notice", title: message, detail: "You can ask up to 10 questions a minute." };
+  if (kind === "off") return { state: "notice", title: message };
+  return { state: "notice", title: message || "Something went wrong. Try again.", detail: "Try asking in a different way." };
+}
 
 /** The question box, the suggestion chips and the answers, newest first. */
-export function AskPanel({ answers, suggestions, initialQuestion, startWith = [] }: Props) {
+export function AskPanel({ suggestions, initialQuestion }: Props) {
   const router = useRouter();
-  const nextId = useRef(startWith.length);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const [items, setItems] = useState<AskItem[]>(() =>
-    startWith.map((k, i) => ({ id: i, q: answers[k].q, state: "answer", answer: answers[k], fresh: false })),
-  );
+  const nextId = useRef(0);
+  const [items, setItems] = useState<AskItem[]>([]);
   const [text, setText] = useState("");
 
   const ask = useCallback(
-    (raw: string) => {
+    async (raw: string) => {
       const q = raw.trim();
       if (!q) return;
       const id = ++nextId.current;
+      const put = (item: AskBody) => setItems((l) => l.map((it) => (it.id === id ? ({ id, q, ...item } as AskItem) : it)));
+      if (q.length > QUESTION_MAX) {
+        setItems((l) => [{ id, q: `${q.slice(0, 60)}…`, state: "notice", title: `Questions can be up to ${QUESTION_MAX} characters.` }, ...l]);
+        return;
+      }
       setItems((l) => [{ id, q, state: "thinking" }, ...l]);
-      timers.current.push(
-        setTimeout(() => {
-          const m = matchAnswer(q, answers);
-          setItems((l) => l.map((it) => (it.id === id ? (m ? { id, q, state: "answer", answer: m, fresh: true } : { id, q, state: "unknown" }) : it)));
-        }, THINK_MS),
-      );
+      try {
+        const res = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q }) });
+        if (res.status === 401) {
+          router.push("/sign-in");
+          return;
+        }
+        const reply = (await res.json().catch(() => null)) as Reply | null;
+        if (reply?.ok) put({ state: "answer", answer: reply.answer, fresh: true });
+        else put(noticeFor(reply?.kind ?? "failed", reply?.message ?? "Something went wrong. Try again."));
+      } catch {
+        put(noticeFor("busy", "The AI is busy, try again in a minute"));
+      }
     },
-    [answers],
+    [router],
   );
 
   // A question typed in ⌘K arrives as ?q=…; ask it once, then tidy the address.
@@ -47,18 +66,13 @@ export function AskPanel({ answers, suggestions, initialQuestion, startWith = []
     }
     if (handled.current === initialQuestion) return;
     handled.current = initialQuestion;
-    ask(initialQuestion);
+    void ask(initialQuestion);
     router.replace("/ask", { scroll: false });
   }, [initialQuestion, ask, router]);
 
-  useEffect(() => {
-    const pending = timers.current;
-    return () => pending.forEach(clearTimeout);
-  }, []);
-
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    ask(text);
+    void ask(text);
     setText("");
   };
 
@@ -75,6 +89,7 @@ export function AskPanel({ answers, suggestions, initialQuestion, startWith = []
             name="q"
             value={text}
             onChange={(e) => setText(e.target.value)}
+            maxLength={QUESTION_MAX + 1}
             placeholder="Ask about your data, e.g. Which product had the most add-to-carts yesterday?"
             autoComplete="off"
             aria-label="Ask about your data"
@@ -85,7 +100,7 @@ export function AskPanel({ answers, suggestions, initialQuestion, startWith = []
         </form>
         <div className="sugs">
           {suggestions.map((s) => (
-            <Chip key={s} onClick={() => ask(s)}>
+            <Chip key={s} onClick={() => void ask(s)}>
               {s}
             </Chip>
           ))}

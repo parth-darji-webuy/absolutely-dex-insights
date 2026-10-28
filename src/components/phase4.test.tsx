@@ -4,17 +4,27 @@ import { AnswerCard } from "@/components/ask/AnswerCard";
 import { EventsTable } from "@/components/events/EventsTable";
 import { ReportsPanel } from "@/components/reports/ReportsPanel";
 import { QuickViewReplica } from "@/components/site/QuickViewReplica";
-import { ANSWERS, EVT_META, generateEvents, QV } from "@/mocks";
+import { EVENT_META as EVT_META } from "@/lib/event-meta";
+import { makeEvents, QV } from "@/test/fixtures";
+import type { Answer } from "@/types";
 import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard, InterestCard } from "./products/ProductCards";
 import { EventMixCard, PerMinuteCard } from "./events/EventCards";
 
-// The cards read through @/lib/data; here it hands out the prototype's sample data so the markup can be checked.
+// The cards read through @/lib/data; here it hands out fixed test data so the markup can be checked.
 const state = vi.hoisted(() => ({ products: null as null | import("@/types").ProductsData }));
 vi.mock("@/lib/data", async () => {
-  const m = await import("@/mocks");
-  const sample = { products: m.PRODUCTS, cats: m.CATS, colours: m.COLOURS, qv: m.QV, viewsTracked: true };
-  const overview = { days: m.DAYS, visitors: m.VIS, visitorsPrevWeek: m.VIS_PREV, addToCarts: m.ATC, addToCartsPrevWeek: m.ATC_PREV, flagCounts: m.FLAG_COUNTS, runningCounts: m.RUNNING_COUNTS, sources: m.SOURCES, devices: m.DEVICES, eventMeta: m.EVT_META, daily: m.DAILY };
-  return { getProducts: async () => state.products ?? sample, getOverview: async () => overview, getEvents: async () => m.generateEvents(), getEventsPerMinute: async () => m.generateEventsPerMinute(), getExperiments: async () => m.EXPS, getExperiment: async () => null, getStoreLast30: async () => null, getReportRows: async () => [] };
+  const f = await import("@/test/fixtures");
+  const perMinute = { labels: Array.from({ length: 60 }, (_, i) => (i === 59 ? "now" : `−${59 - i}m`)), series: Object.entries(f.OVERVIEW.eventMeta).map(([key, m], k) => ({ key, name: m.label, color: m.c, values: Array.from({ length: 60 }, (_, i) => (k === 0 ? 8 : (i + k) % 3)) })) };
+  return {
+    getProducts: async () => state.products ?? f.PRODUCTS_DATA,
+    getOverview: async () => f.OVERVIEW,
+    getEvents: async () => f.makeEvents(Date.now()),
+    getEventsPerMinute: async () => perMinute,
+    getExperiments: async () => f.EXPS,
+    getExperiment: async () => null,
+    getStoreLast30: async () => null,
+    getReportRows: async () => [],
+  };
 });
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh() {}, push() {}, replace() {} }) }));
 
@@ -24,7 +34,7 @@ const ZERO = { seen: 0, btn: 0, eye: 0, opened: 0, heartCard: 0, add: 0, detail:
 
 describe("Events page", () => {
   it("lists the latest 40 events with an 'ago' next to each time", () => {
-    const m = html(<EventsTable events={generateEvents()} meta={EVT_META} qv={QV} weekLabel="Oct 10 – 16" />);
+    const m = html(<EventsTable events={makeEvents(Date.now())} meta={EVT_META} qv={QV} weekLabel="Oct 10 – 16" />);
     expect(m.match(/<tr class="click"/g)).toHaveLength(40);
     expect(m).toMatch(/\d+s ago/);
     expect(m).not.toMatch(BAD);
@@ -38,7 +48,7 @@ describe("Events page", () => {
 
   it("draws the per-minute chart and the mix without NaN", async () => {
     const [a, b] = await Promise.all([PerMinuteCard(), EventMixCard()]);
-    expect(html(a)).toContain("529 events");
+    expect(html(a)).toContain("Events per minute");
     expect(html(b)).toContain("Event mix");
     expect(html(a) + html(b)).not.toMatch(BAD);
   });
@@ -83,18 +93,30 @@ describe("Products page", () => {
   });
 });
 
+const BUY_NOW: Answer = {
+  q: "How is the Buy Now test doing?",
+  a: "“Buy Now” is ahead: 12.0% of people who saw it added to cart, vs 10.0% for “Add to Cart” (+20%). Insights is about 94% sure; wait ~3 more days.",
+  bars: [["Add to Cart (control)", 10.0], ["Buy Now", 12.0]],
+  unit: "%",
+  cols: ["Variant", "People who saw it", "Added to cart", "Rate"],
+  rows: [["Add to Cart", "1,000", "100", "10.0%"], ["Buy Now", "1,000", "120", "12.0%"]],
+  sql: 'SELECT "variationId", COUNT(*) FROM experiment_tracking GROUP BY 1 LIMIT 200',
+};
+
 describe("Ask page", () => {
   const item = { id: 1, q: "How is the Buy Now test doing?" };
   it("shows thinking, the answer and the couldn't-match card", () => {
     expect(html(<AnswerCard item={{ ...item, state: "thinking" }} index={0} />)).toContain("Looking at your events…");
-    const done = html(<AnswerCard item={{ ...item, state: "answer", answer: ANSWERS.buyNow, fresh: false }} index={0} />);
+    const done = html(<AnswerCard item={{ ...item, state: "answer", answer: BUY_NOW, fresh: false }} index={0} />);
     expect(done).toContain("Show the query / numbers");
-    expect(done).toContain("AI answer · Groq free plan");
+    expect(done).toContain("AI answer · Groq");
     expect(done).toContain("94% sure");
     expect(done).not.toMatch(BAD);
-    const none = html(<AnswerCard item={{ ...item, q: "weather?", state: "unknown" }} index={0} />);
-    expect(none).toContain("I couldn&#x27;t match that to anything Insights tracks, so I won&#x27;t guess.");
+    const none = html(<AnswerCard item={{ ...item, q: "delete every row", state: "notice", title: "I can only answer questions about the tracked data", tables: true }} index={0} />);
+    expect(none).toContain("I can only answer questions about the tracked data");
     expect(none).toContain("theme_toggle_tracking");
+    const busy = html(<AnswerCard item={{ ...item, state: "notice", title: "The AI is busy, try again in a minute", detail: "Ask again in a minute." }} index={0} />);
+    expect(busy).toContain("The AI is busy, try again in a minute");
   });
 });
 

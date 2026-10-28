@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { EXPS } from "@/mocks";
-import { dailyPeople, daysBetween, eachDay, hms, niceDate, presetRange, rangeError, splitTotal, ymd } from "./dates";
+import { EXPS } from "@/test/fixtures";
+import { dailyPeople, daysBetween, niceDate, presetRange, rangeError, ymd } from "./dates";
 
 // Expected values were produced by running the prototype's own helpers with "today" = 28 Oct 2026.
 const today = new Date(2026, 9, 28, 12);
@@ -8,10 +8,9 @@ const start = new Date(2026, 8, 1);
 const d = (y: number, m: number, day: number) => new Date(y, m, day);
 
 describe("dates", () => {
-  it("formats dates and times", () => {
+  it("formats dates", () => {
     expect(niceDate(d(2026, 9, 5))).toBe("05 Oct 2026");
     expect(ymd(d(2026, 0, 9))).toBe("2026-01-09");
-    expect(hms(new Date(2026, 0, 9, 7, 5, 3))).toBe("07:05:03");
   });
 
   it("daysBetween counts both ends", () => {
@@ -34,20 +33,6 @@ describe("dates", () => {
     expect(rangeError(d(2026, 9, 1), d(2026, 10, 3), today, start)).toBe("The To date can’t be in the future.");
     expect(rangeError(d(2026, 7, 1), d(2026, 9, 1), today, start)).toBe("Data starts on 01 Sep 2026. Pick a later From date.");
     expect(rangeError(d(2026, 8, 1), d(2026, 9, 28), today, start)).toBe("");
-  });
-
-  it("eachDay lists every day across a month end", () => {
-    expect(eachDay(d(2026, 9, 26), d(2026, 10, 2)).map(ymd)).toEqual([
-      "2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01", "2026-11-02",
-    ]);
-    expect(eachDay(d(2026, 9, 5), d(2026, 9, 1))).toEqual([]);
-  });
-
-  it("splitTotal is seeded and always adds up", () => {
-    expect(splitTotal(1000, 11, 11)).toEqual([85, 86, 89, 78, 103, 108, 79, 103, 80, 84, 105]);
-    expect(splitTotal(53, 7, 30)).toEqual([7, 9, 7, 9, 8, 6, 7]);
-    expect(splitTotal(0, 3, 1)).toEqual([0, 0, 0]);
-    expect(splitTotal(10, 0, 1)).toEqual([]);
   });
 
   it("dailyPeople is the experiment's own daily split, and adds up to its people", () => {

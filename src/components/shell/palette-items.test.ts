@@ -39,3 +39,18 @@ describe("palette items", () => {
     expect(paletteItems("", [], []).map((i) => i.label)).toEqual(["Overview", "Experiments", "Events", "Products", "Reports", "Ask your data"]);
   });
 });
+
+describe("with AI switched off", () => {
+  const exps = [{ key: "k", name: "Quick view", desc: "d", status: "Running" }];
+  it("has no Ask item, no suggested questions and no Ask page", () => {
+    const items = paletteItems("quick", exps, ["Which product?"], false);
+    expect(items.map((i) => i.group)).not.toContain("Ask AI");
+    expect(items.map((i) => i.group)).not.toContain("Suggested questions");
+    expect(paletteItems("", exps, ["Which product?"], false).some((i) => i.label === "Ask your data")).toBe(false);
+    expect(items.some((i) => i.label === "Quick view")).toBe(true);
+  });
+  it("still has them when AI is on", () => {
+    expect(paletteItems("quick", exps, ["Which product?"], true).some((i) => i.group === "Ask AI")).toBe(true);
+    expect(paletteItems("", exps, ["Which product?"]).some((i) => i.label === "Ask your data")).toBe(true);
+  });
+});

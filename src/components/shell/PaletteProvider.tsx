@@ -2,11 +2,11 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-type PaletteApi = { open: boolean; show: () => void; hide: () => void };
+type PaletteApi = { open: boolean; show: () => void; hide: () => void; /** False when AI_PROVIDER is "none": no Ask in ⌘K or the header. */ aiEnabled: boolean };
 const PaletteContext = createContext<PaletteApi | null>(null);
 
 /** Holds whether the ⌘K palette is open, and listens for ⌘K / Ctrl+K anywhere in the app. */
-export function PaletteProvider({ children }: { children: ReactNode }) {
+export function PaletteProvider({ children, aiEnabled = true }: { children: ReactNode; aiEnabled?: boolean }) {
   const [open, setOpen] = useState(false);
   const show = useCallback(() => setOpen(true), []);
   const hide = useCallback(() => setOpen(false), []);
@@ -22,7 +22,7 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  const api = useMemo(() => ({ open, show, hide }), [open, show, hide]);
+  const api = useMemo(() => ({ open, show, hide, aiEnabled }), [open, show, hide, aiEnabled]);
   return <PaletteContext value={api}>{children}</PaletteContext>;
 }
 

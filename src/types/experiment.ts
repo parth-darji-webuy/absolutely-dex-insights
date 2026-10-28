@@ -2,7 +2,7 @@ export type VariantStat = { label: string; people: number; conv: number };
 
 export type ExperimentPreview = "button" | "quick" | "whatsnew" | "theme";
 
-/** What the sample data says about a test, before the derived numbers are added. */
+/** The fields every test starts with, before the numbers worked out from its daily counts are added. */
 export type ExperimentSeed = {
   key: string;
   flag: string;

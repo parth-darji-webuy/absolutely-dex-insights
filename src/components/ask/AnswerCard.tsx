@@ -10,7 +10,13 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TRACKING_TABLES } from "@/lib/tables";
 import type { Answer } from "@/types";
 
-export type AskItem = { id: number; q: string } & ({ state: "thinking" } | { state: "unknown" } | { state: "answer"; answer: Answer; fresh: boolean });
+export type AskBody =
+  | { state: "thinking" }
+  /** A reply that is not an answer: a refusal, "the AI is busy", too many questions... */
+  | { state: "notice"; title: string; detail?: string; tables?: boolean }
+  | { state: "answer"; answer: Answer; fresh: boolean };
+
+export type AskItem = { id: number; q: string } & AskBody;
 
 const Question = ({ q }: { q: string }) => (
   <div className="q">
@@ -58,22 +64,26 @@ export function AnswerCard({ item, index }: { item: AskItem; index: number }) {
         </div>
       </Card>
     );
-  if (item.state === "unknown")
+  if (item.state === "notice")
     return (
       <Card bodyClassName="!p-0">
-        <div className="answer">
+        <div className="answer" role="status">
           <Question q={item.q} />
-          <div className="a">I couldn&apos;t match that to anything Insights tracks, so I won&apos;t guess.</div>
-          <div className="text-[13px] text-text2">
-            Insights only answers from your tracking tables:{" "}
-            {TRACKING_TABLES.map((t, i) => (
-              <span key={t}>
-                {i > 0 && ", "}
-                <code>{t}</code>
-              </span>
-            ))}
-            . Try one of the suggestions above.
-          </div>
+          <div className="a">{item.title}</div>
+          {item.tables ? (
+            <div className="text-[13px] text-text2">
+              Insights only answers from your tracking tables:{" "}
+              {TRACKING_TABLES.map((t, i) => (
+                <span key={t}>
+                  {i > 0 && ", "}
+                  <code>{t}</code>
+                </span>
+              ))}
+              , and the product list. Try one of the suggestions above.
+            </div>
+          ) : (
+            item.detail && <div className="text-[13px] text-text2">{item.detail}</div>
+          )}
         </div>
       </Card>
     );
@@ -84,7 +94,7 @@ export function AnswerCard({ item, index }: { item: AskItem; index: number }) {
         <div className="row justify-between">
           <Question q={item.q} />
           <Tag tone="ai">
-            <Icon name="spark" size="sm" /> AI answer · Groq free plan
+            <Icon name="spark" size="sm" /> AI answer · Groq
           </Tag>
         </div>
         <TypedText text={a.a} animate={item.fresh} />

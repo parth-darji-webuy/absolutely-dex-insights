@@ -6,7 +6,7 @@ import { FlagsKpi } from "@/components/overview/FlagsKpi";
 import { RunCard } from "@/components/overview/RunCard";
 import { StoreScene } from "@/components/overview/StoreScene";
 import { SummaryBody } from "@/components/overview/NumbersToggle";
-import { EXPS, IDLE, RECENT, RECENT_MIN, ZONES } from "@/mocks";
+import { EXPS, IDLE, RECENT, RECENT_MIN, ZONES } from "@/test/fixtures";
 import type { Experiment } from "@/types";
 import { ExplainButton } from "./ExplainDrawer";
 import { ExperimentCard } from "./ExperimentCard";
@@ -66,8 +66,9 @@ describe("Experiment page pieces", () => {
     expect(html(<TrafficLine e={EXPS[0]} />)).toContain("Traffic split 58 / 42");
   });
 
-  it("shows the sample verdict", () => {
-    expect(html(<VerdictCard e={EXPS[0]} />)).toContain("Treatment is probably winning.");
+  it("shows the verdict the numbers give", () => {
+    expect(EXPS[0].verdict[0]).toBeTruthy();
+    expect(html(<VerdictCard e={EXPS[0]} />)).toContain(EXPS[0].verdict[0].replace(/’/g, "&#x27;"));
   });
 });
 

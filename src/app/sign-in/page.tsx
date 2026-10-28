@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AuthSide } from "@/components/auth/AuthSide";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { BrandMark } from "@/components/BrandMark";
-import { ACCOUNT } from "@/lib/mock-auth";
+import { ADMIN } from "@/config/accounts";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -15,7 +15,7 @@ export default function SignInPage() {
           <div className="auth-logo mb-[22px]">
             <BrandMark variant="dark" priority />
           </div>
-          <SignInForm defaultEmail={ACCOUNT.email} />
+          <SignInForm defaultEmail={ADMIN.email} />
         </div>
       </main>
     </div>

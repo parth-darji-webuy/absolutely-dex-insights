@@ -2,11 +2,11 @@ import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { signOutAction } from "@/app/sign-in/actions";
-import { getCurrentUser } from "@/lib/session";
+import { requireUser } from "@/lib/session";
 
 /** The signed-in person, top right, with Sign out. Streams in behind a Suspense boundary. */
 export async function Account() {
-  const user = await getCurrentUser();
+  const user = await requireUser();
   return (
     <div className="acct">
       <span className="avatar" aria-hidden="true">

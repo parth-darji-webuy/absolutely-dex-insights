@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/store"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id          String    @id
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  Product     Product[]
+}
+
+model Product {
+  id             String     @id
+  name           String
+  slug           String     @unique
+  description    String
+  price          Float
+  originalPrice  Float?
+  discount       Int?
+  brand          String
+  categoryId     String
+  images         String
+  rating         Float      @default(4.8)
+  reviewCount    Int        @default(12)
+  stockStatus    String     @default("In Stock")
+  sizes          String?
+  colors         String?
+  specifications String?
+  isFeatured     Boolean    @default(false)
+  isNewArrival   Boolean    @default(false)
+  isTrending     Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime
+  Category       Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  Review         Review[]
+  Wishlist       Wishlist[]
+}
+
+model Review {
+  id        String   @id
+  productId String
+  userId    String?
+  userName  String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+  Product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  User      User?    @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id           String     @id
+  email        String     @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime
+  Review       Review[]
+  Wishlist     Wishlist[]
+}
+
+model Wishlist {
+  id        String   @id
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  Product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model add_to_cart_tracking {
+  id            String   @id
+  anonymousId   String
+  productId     String
+  productName   String?
+  slug          String?
+  brand         String?
+  price         Decimal?
+  quantity      Int
+  selectedSize  String?
+  selectedColor String?
+  createdAt     DateTime @default(now())
+
+  @@index([anonymousId])
+  @@index([anonymousId, productId])
+  @@index([createdAt])
+  @@index([productId])
+}
+
+model experiment_exposure {
+  id             String   @id(map: "ExperimentExposure_pkey")
+  anonymousId    String
+  experimentKey  String
+  experimentName String?
+  variationId    Int
+  variationName  String?
+  variationValue String?
+  createdAt      DateTime @default(now())
+  featureId      String?
+
+  @@index([anonymousId], map: "ExperimentExposure_anonymousId_idx")
+  @@index([experimentKey], map: "ExperimentExposure_experimentKey_idx")
+  @@index([experimentKey, variationId], map: "ExperimentExposure_experimentKey_variationId_idx")
+}
+
+model experiment_exposures {
+  id             Int       @id @default(autoincrement())
+  user_id        String
+  experiment_key String
+  variation      String
+  timestamp      DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model experiment_tracking {
+  id             String   @id
+  anonymousId    String
+  experimentKey  String
+  experimentName String?
+  variationId    Int
+  variationName  String?
+  variationValue String?
+  featureId      String?
+  createdAt      DateTime @default(now())
+
+  @@unique([anonymousId, experimentKey])
+  @@index([anonymousId])
+  @@index([createdAt])
+  @@index([experimentKey])
+  @@index([experimentKey, variationId])
+}
+
+model quick_view_cart_events {
+  id          String   @id @db.VarChar(50)
+  anonymousId String   @db.VarChar(100)
+  productId   String   @db.VarChar(100)
+  eventName   String   @db.VarChar(100)
+  source      String   @db.VarChar(50)
+  createdAt   DateTime @db.Timestamp(6)
+}
+
+model quickview_tracking {
+  id             String   @id
+  anonymousId    String
+  customerId     String?
+  productId      String
+  featureKey     String   @default("quick-view-enabled")
+  featureEnabled Boolean
+  experimentKey  String?
+  variationId    Int?
+  createdAt      DateTime @default(now())
+}
+
+model theme_toggle_tracking {
+  id          String   @id
+  anonymousId String
+  theme       String
+  createdAt   DateTime @default(now())
+}
+
+model users {
+  user_id    String    @id
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model whats_new_tracking {
+  id             String   @id
+  anonymousId    String
+  experimentKey  String
+  variationId    Int
+  variationName  String
+  variationValue String
+  createdAt      DateTime @default(now())
+
+  @@index([anonymousId])
+  @@index([experimentKey])
+  @@index([variationId])
+}

@@ -1,4 +1,4 @@
-import { ACCOUNT } from "@/lib/mock-auth";
+import { ADMIN } from "@/config/accounts";
 import { experiments } from "@/lib/queries";
 import { ReportsPanel } from "./ReportsPanel";
 
@@ -8,7 +8,7 @@ export async function ReportsLoader() {
   return (
     <ReportsPanel
       experiments={list.map(({ key, name, flag, metricShort, mtable, status, start }) => ({ key, name, flag, metricShort, mtable, status, start }))}
-      generatedBy={`${ACCOUNT.name} (${ACCOUNT.role})`}
+      generatedBy={`${ADMIN.name} (${ADMIN.role})`}
     />
   );
 }

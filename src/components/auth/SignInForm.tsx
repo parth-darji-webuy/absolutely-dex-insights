@@ -190,7 +190,8 @@ export function SignInForm({ defaultEmail }: { defaultEmail: string }) {
           type="submit"
           variant="primary"
           size="auth"
-          className={cn("group mt-3.5", phase === "loading" && "pointer-events-none opacity-90", phase === "done" && "pointer-events-none border-green bg-green")}
+          disabled={busy}
+          className={cn("group mt-3.5 disabled:!cursor-default disabled:!opacity-100", phase === "loading" && "pointer-events-none opacity-90", phase === "done" && "pointer-events-none border-green bg-green")}
         >
           {phase === "idle" && (
             <>

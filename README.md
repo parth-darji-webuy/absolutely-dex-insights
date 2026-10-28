@@ -9,6 +9,16 @@ A dashboard for the store's A/B tests, events and products. It runs only on this
 - **Ask your data:** type a question in plain English and get an answer with the numbers and the SQL behind it. The AI part is Groq (see below) and can be switched off.
 - **Who can use it:** one Admin account, on this computer only.
 
+## Documentation
+
+| Read this | When |
+| --- | --- |
+| [docs/SIMPLE.md](docs/SIMPLE.md) | You want it explained in the simplest possible words first |
+| [docs/SETUP.md](docs/SETUP.md) | You just pulled the project and want it running (about 20 minutes) |
+| [docs/PROJECT.md](docs/PROJECT.md) | You want the whole picture: how it was built, what each page does, how the numbers are worked out, security, every `.env` value, troubleshooting |
+| [docs/sql/](docs/sql/) | The SQL to run: create the read-only login, check it, check the numbers, find out why a page is empty |
+| [docs/demo-data.sql](docs/demo-data.sql) | Fake visitors for a demo (on a test branch only) |
+
 ## First time
 
 1. Use Node 22.12 or newer (`nvm use` reads `.nvmrc`).

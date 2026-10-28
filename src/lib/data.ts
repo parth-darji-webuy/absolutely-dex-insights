@@ -1,56 +1,35 @@
-// The only place pages get data from. Until phase 6 these return the sample data after 400 ms;
-// then they become real queries with the same names and types.
-import { ATC, ATC_PREV, DAILY, DAYS, DEVICES, FLAG_COUNTS, RUNNING_COUNTS, SOURCES, EBY, EVT_META, EXPS, generateEvents, generateEventsPerMinute, PRODUCTS, CATS, COLOURS, QV, IDLE, RECENT, RECENT_MIN, RECENT_VISITORS, VIS, VIS_PREV, ZONES } from "@/mocks";
+// The only place pages get data from. Everything here reads the store's database through
+// src/lib/store/*, read-only. Names and types are the ones the pages were built against.
+import { connection } from "next/server";
 import type { AnalyticsEvent, EventsPerMinute, Experiment, Overview, ProductsData, ReportRow, StoreLast30 } from "@/types";
-import { daysBetween, eachDay, expDay, WDAY, ymd } from "./dates";
+import { loadEvents, loadEventsPerMinute } from "./store/events";
+import { loadExperiments } from "./store/experiments";
+import { loadOverview, loadStoreLast30 } from "./store/overview";
+import { loadProducts } from "./store/products";
+import { loadReportRows } from "./store/reports";
 
-const LATENCY_MS = 400;
-const later = async <T>(make: () => T): Promise<T> => {
-  await new Promise((resolve) => setTimeout(resolve, LATENCY_MS));
-  return structuredClone(make());
+// The numbers depend on the clock and the database, so they are worked out for each visit,
+// never while the app is being built.
+const live = <A extends unknown[], R>(fn: (...args: A) => Promise<R>) => async (...args: A): Promise<R> => {
+  await connection();
+  return fn(...args);
 };
 
-export const getOverview = (): Promise<Overview> =>
-  later(() => ({ days: DAYS, visitors: VIS, visitorsPrevWeek: VIS_PREV, addToCarts: ATC, addToCartsPrevWeek: ATC_PREV, flagCounts: FLAG_COUNTS, runningCounts: RUNNING_COUNTS, sources: SOURCES, devices: DEVICES, eventMeta: EVT_META, daily: DAILY }));
+export const getOverview = live((): Promise<Overview> => loadOverview());
 
-export const getStoreLast30 = (): Promise<StoreLast30> =>
-  later(() => ({ minutes: RECENT_MIN, visitors: RECENT_VISITORS, zones: ZONES, idle: IDLE, recent: RECENT }));
+export const getStoreLast30 = live((): Promise<StoreLast30> => loadStoreLast30());
 
-export const getExperiments = (): Promise<Experiment[]> => later(() => EXPS);
+export const getExperiments = live((): Promise<Experiment[]> => loadExperiments());
 
 /** Resolves to null when there is no experiment with that key. */
-export const getExperiment = (key: string): Promise<Experiment | null> => later(() => EBY[key] ?? null);
+export const getExperiment = live(async (key: string): Promise<Experiment | null> => (await loadExperiments()).find((e) => e.key === key) ?? null);
 
-export const getEvents = (): Promise<AnalyticsEvent[]> => later(() => generateEvents());
+export const getEvents = live((): Promise<AnalyticsEvent[]> => loadEvents());
 
 /** Events in each of the last 60 minutes, for the Events page chart. */
-export const getEventsPerMinute = (): Promise<EventsPerMinute> => later(() => generateEventsPerMinute());
+export const getEventsPerMinute = live((): Promise<EventsPerMinute> => loadEventsPerMinute());
 
-export const getProducts = (): Promise<ProductsData> => later(() => ({ products: PRODUCTS, cats: CATS, colours: COLOURS, qv: QV }));
+export const getProducts = live((): Promise<ProductsData> => loadProducts());
 
 /** Daily results for one experiment, two rows (control, treatment) per day. Empty for an unknown key or period. */
-export const getReportRows = (key: string, from: Date, to: Date): Promise<ReportRow[]> =>
-  later(() => {
-    const e = EBY[key];
-    if (!e || !(daysBetween(from, to) > 0)) return [];
-    return eachDay(from, to).flatMap((d) => {
-      const x = expDay(e, d);
-      if (!x) return [];
-      return (["c", "t"] as const).map((k): ReportRow => {
-        const n = x[k];
-        const converted = Math.round((n * (k === "c" ? e.rc : e.rt)) / 100);
-        return {
-          date: ymd(d),
-          weekday: WDAY[d.getDay()],
-          experiment: e.name,
-          flag: e.flag,
-          variant: k === "c" ? "control" : "treatment",
-          label: e[k].label,
-          people: n,
-          converted,
-          ratePct: (n ? (converted / n) * 100 : 0).toFixed(2),
-          metric: e.metricShort,
-        };
-      });
-    });
-  });
+export const getReportRows = live((key: string, from: Date, to: Date): Promise<ReportRow[]> => loadReportRows(key, from, to));

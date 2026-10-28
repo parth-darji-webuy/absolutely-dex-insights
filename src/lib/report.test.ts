@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getReportRows } from "./data";
 import { buildReport, csvText } from "./report";
-import { vi } from "vitest";
 import type { ReportRow } from "@/types";
 
 const row: ReportRow = { date: "2026-10-07", weekday: "Wed", experiment: "Add to Cart button text", flag: "add-to-cart-btn", variant: "control", label: "Add to Cart", people: 120, converted: 12, ratePct: "10.00", metric: "added to cart" };
@@ -44,17 +42,5 @@ describe("csvText", () => {
 
   it("keeps a date as text, so it opens as 2026-10-07", () => {
     expect(csvText([["2026-10-07"]])).toContain('"2026-10-07"');
-  });
-});
-
-describe("report rows from the data layer", () => {
-  it("make a two-row-per-day report", async () => {
-    vi.useFakeTimers();
-    const p = getReportRows("add-to-cart", new Date(2026, 9, 7), new Date(2026, 9, 9));
-    await vi.advanceTimersByTimeAsync(400);
-    const rows = await p;
-    vi.useRealTimers();
-    expect(rows).toHaveLength(6);
-    expect(buildReport({ key: "add-to-cart", name: "x" }, rows, new Date(2026, 9, 7), new Date(2026, 9, 9), "x", NOW).rows).toHaveLength(6);
   });
 });

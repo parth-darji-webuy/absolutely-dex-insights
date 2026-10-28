@@ -15,7 +15,7 @@ describe("experiment helpers", () => {
   });
 
   it("has no split when nobody came", () => {
-    const e = { ...EBY["theme-toggle-ab-test"], series: { c: [], t: [] }, c: { label: "a", people: 0, conv: 0 }, t: { label: "b", people: 0, conv: 0 } };
+    const e = { ...EBY["theme-toggle-ab-test"], series: { c: [], t: [] }, daily: { c: [], t: [] }, c: { label: "a", people: 0, conv: 0 }, t: { label: "b", people: 0, conv: 0 } };
     expect(trafficSplit(e)).toEqual({ c: 0, t: 0, pc: null, off: false });
   });
 

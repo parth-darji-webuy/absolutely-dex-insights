@@ -33,9 +33,9 @@ export function runQuery<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
   return withRetry(() =>
     db().$transaction(
       async (tx) => {
-        // Read-only first (it must come before any other statement), so no write can get through even if the role allows one.
-        await tx.$executeRaw`SET TRANSACTION READ ONLY`;
-        await tx.$executeRaw`SET LOCAL statement_timeout = 15000`;
+        // One statement does both of these, for this transaction only (the same as SET TRANSACTION READ ONLY and
+        // SET LOCAL statement_timeout): no write can get through even if the role allows one, and no query runs past 15 s.
+        await tx.$queryRaw`SELECT set_config('transaction_read_only', 'on', true), set_config('statement_timeout', '15000', true)`;
         return fn(tx);
       },
       // The transaction may wait a little for a connection; the statement timeout above is what limits each query.

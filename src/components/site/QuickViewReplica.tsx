@@ -48,13 +48,15 @@ export function QuickViewReplica({ qv, heat }: { qv: QuickViewStats; heat: boole
         <div className="qv-row2">
           <button className="qv-wish hs" style={{ "--a": a(qv.wish) } as React.CSSProperties} tabIndex={-1}>
             <Icon name="heartS" /> Wishlist
-            <Hot lo tip={`Wishlisted: ${fmt(qv.wish)} of ${fmt(qv.opened)}`}>
-              {p(qv.wish)}
-            </Hot>
+            {qv.extrasTracked && (
+              <Hot lo tip={`Wishlisted: ${fmt(qv.wish)} of ${fmt(qv.opened)}`}>
+                {p(qv.wish)}
+              </Hot>
+            )}
           </button>
           <button className="qv-detail hs" style={{ "--a": a(qv.detail) } as React.CSSProperties} tabIndex={-1}>
             Product Detail <Icon name="arrow" size="sm" />
-            <Hot tip={`Went to the product page: ${fmt(qv.detail)} of ${fmt(qv.opened)}`}>{p(qv.detail)}</Hot>
+            {qv.extrasTracked && <Hot tip={`Went to the product page: ${fmt(qv.detail)} of ${fmt(qv.opened)}`}>{p(qv.detail)}</Hot>}
           </button>
         </div>
         <div className="qv-trust">

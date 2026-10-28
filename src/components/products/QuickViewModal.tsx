@@ -14,12 +14,12 @@ type Props = { open: boolean; onClose: () => void; qv: QuickViewStats; weekLabel
 /** The store's Quick View as shoppers see it, with a switch that lays the click data on top. */
 export function QuickViewModal({ open, onClose, qv, weekLabel }: Props) {
   const [heat, setHeat] = useState(true);
-  const outcomes = [
+  const outcomes: [string, number | null][] = [
     ["Added to cart", qv.add],
-    ["Opened product detail", qv.detail],
-    ["Wishlisted", qv.wish],
-    ["Closed without acting", qv.closed],
-  ] as const;
+    ["Opened product detail", qv.extrasTracked ? qv.detail : null],
+    ["Wishlisted", qv.extrasTracked ? qv.wish : null],
+    ["Closed without acting", qv.extrasTracked ? qv.closed : null],
+  ];
   return (
     <Modal open={open} onClose={onClose} title="Quick view, as your shoppers see it" subtitle={`Opened by ${fmt(qv.opened)} people this week${weekLabel ? ` · ${weekLabel}` : ""} · numbers show what they clicked`}>
       <div className="qv-shell">
@@ -39,8 +39,8 @@ export function QuickViewModal({ open, onClose, qv, weekLabel }: Props) {
           {outcomes.map(([label, n]) => (
             <div key={label}>
               <span>{label}</span>
-              <b>{fmt(n)}</b>
-              <em>{pct(ofOpened(qv, n))}</em>
+              <b>{n === null ? "—" : fmt(n)}</b>
+              <em>{n === null ? "Not tracked" : pct(ofOpened(qv, n))}</em>
             </div>
           ))}
         </div>

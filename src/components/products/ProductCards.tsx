@@ -17,7 +17,13 @@ const code = (t: string) => (
 );
 
 export async function InterestCard() {
-  const { products: list } = await products();
+  const { products: list, viewsTracked } = await products();
+  if (!viewsTracked)
+    return (
+      <Card title="Interest vs conversion" subtitle="Each bubble is a product · bigger = more add-to-carts · hover for numbers" source={{ tables: [code("add_to_cart_tracking")], gap: "Views not tracked yet" }} delay={40}>
+        <EmptyState title="Not tracked yet" text="The store doesn’t record product views yet, so views can’t be compared with add-to-carts." />
+      </Card>
+    );
   return (
     <Card title="Interest vs conversion" subtitle="Each bubble is a product · bigger = more add-to-carts · hover for numbers" source={{ tables: [code("add_to_cart_tracking")], gap: "Views not tracked yet" }} delay={40}>
       <div className="mx-auto max-w-[860px]">
@@ -27,12 +33,13 @@ export async function InterestCard() {
   );
 }
 
-const COLS = [
+const ALL_COLS = [
   ["views", "Views"],
   ["qv", "Quick views"],
   ["atc", "Add to cart"],
   ["rate", "Add rate"],
 ] as const;
+type ColKey = (typeof ALL_COLS)[number][0];
 
 /** What the insight line calls a product that is viewed a lot but rarely added, and what to check on it. */
 const NOTES: Record<string, [string, string]> = {
@@ -41,15 +48,17 @@ const NOTES: Record<string, [string, string]> = {
 };
 
 export async function HeatGridCard() {
-  const { products: list } = await products();
+  const { products: list, viewsTracked } = await products();
+  // Without product views there is no add rate either, so those two columns are left out.
+  const COLS = ALL_COLS.filter(([k]) => viewsTracked || (k !== "views" && k !== "rate"));
   const rows = list.map((p) => ({ ...p, rate: addRate(p) }));
-  const value = (r: (typeof rows)[number], k: (typeof COLS)[number][0]) => r[k];
-  const range = (k: (typeof COLS)[number][0]) => {
+  const value = (r: (typeof rows)[number], k: ColKey) => r[k];
+  const range = (k: ColKey) => {
     const v = rows.map((r) => value(r, k)).filter(Number.isFinite);
     return [Math.min(...v), Math.max(...v)] as const;
   };
-  const cold = coldProducts(list);
-  const label = (k: (typeof COLS)[number][0], v: number) => (k === "rate" ? pct(v) : fmt(v));
+  const cold = viewsTracked ? coldProducts(list) : [];
+  const label = (k: ColKey, v: number) => (k === "rate" ? pct(v) : fmt(v));
   return (
     <Card
       title="Product heat grid"
@@ -59,10 +68,10 @@ export async function HeatGridCard() {
           Cool <i /> Hot
         </span>
       }
-      source={{ tables: [code('"Product"'), code("quickview_tracking"), code("add_to_cart_tracking")], gap: "Views not tracked yet" }}
+      source={{ tables: [code('"Product"'), code("quickview_tracking"), code("add_to_cart_tracking")], gap: viewsTracked ? undefined : "Views not tracked yet" }}
     >
       {rows.length === 0 ? (
-        <EmptyState title="No products yet" text="Products appear here once people start viewing them." />
+        <EmptyState title="No product activity this week" text="Products show up here once people open their quick view or add them to the cart." />
       ) : (
         <>
           <div className="table-wrap">
@@ -143,18 +152,20 @@ function Insight({ cold, overall, total }: { cold: { name: string; views: number
 
 export async function FunnelCard() {
   const { qv } = await products();
-  const steps = [
+  const all = [
     ["Saw quick view button", "Not tracked yet: sample", qv.seen],
     ["Opened quick view", "quickview_tracking", qv.opened],
     ["Added to cart", "quick_view_cart_events", qv.add],
   ] as const;
+  // The store doesn't record who saw the button yet; without it the funnel starts at "Opened quick view".
+  const steps = qv.seen > 0 ? all : all.slice(1);
   const first = steps[0][2];
   const share = (n: number) => (first > 0 ? (n / first) * 100 : NaN);
-  const drops = [1, 2].map((i) => ({ i, lost: steps[i - 1][2] - steps[i][2], conv: steps[i - 1][2] > 0 ? (steps[i][2] / steps[i - 1][2]) * 100 : NaN }));
+  const drops = steps.slice(1).map((_, k) => k + 1).map((i) => ({ i, lost: steps[i - 1][2] - steps[i][2], conv: steps[i - 1][2] > 0 ? (steps[i][2] / steps[i - 1][2]) * 100 : NaN }));
   const biggest = drops.reduce((a, b) => (a.lost >= b.lost ? a : b));
-  const flows = [7, 3, 1];
+  const flows = steps.length === 3 ? [7, 3, 1] : [3, 1];
   return (
-    <Card title="Quick view funnel" subtitle="People this week, each step as a share of the one before" source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")], gap: "Step 1 not tracked yet" }} delay={80}>
+    <Card title="Quick view funnel" subtitle="People this week, each step as a share of the one before" source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")], gap: qv.seen > 0 ? "Step 1 not tracked yet" : "Button views not tracked yet" }} delay={80}>
       {first <= 0 ? (
         <EmptyState title="No quick view activity yet" text="The funnel fills in as people open the quick view." />
       ) : (

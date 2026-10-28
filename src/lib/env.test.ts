@@ -7,7 +7,7 @@ const GOOD = {
   SESSION_SECRET: "s".repeat(32),
   ADMIN_PASSWORD: "twelve-chars",
   GROWTHBOOK_API_HOST: "https://api.growthbook.io",
-  GROWTHBOOK_SECRET_KEY: "secret_abc",
+  GROWTHBOOK_CLIENT_KEY: "sdk-abc",
   AI_PROVIDER: "none",
   INSIGHTS_TIMEZONE: "Europe/London",
   TRACKING_START: "2026-09-01",
@@ -76,6 +76,6 @@ describe("parseEnv", () => {
     expect(message).toContain("ADMIN_PASSWORD");
     expect(message).toContain("STORE_DATABASE_URL");
     expect(message).not.toContain("\n");
-    for (const secret of ["short-but-secret", "tiny-pw", "nope-secret-pw", "secret_abc", "twelve-chars"]) expect(message).not.toContain(secret);
+    for (const secret of ["short-but-secret", "tiny-pw", "nope-secret-pw", "sdk-abc", "twelve-chars"]) expect(message).not.toContain(secret);
   });
 });

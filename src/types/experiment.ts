@@ -9,7 +9,7 @@ export type ExperimentSeed = {
   values: [string, string];
   name: string;
   desc: string;
-  status: "Running";
+  status: "Running" | "Stopped";
   days: number;
   /** e.g. "Oct 6, 2026" */
   start: string;
@@ -30,6 +30,8 @@ export type Experiment = Omit<ExperimentSeed, "verb" | "metricShort" | "series">
   verb: string;
   metricShort: string;
   series: { c: number[]; t: number[] };
+  /** People who entered each variant on each day of the test, in step with `series`. */
+  daily: DailySplit;
   /** Tracking table the metric is counted from. */
   mtable: string;
   people: number;

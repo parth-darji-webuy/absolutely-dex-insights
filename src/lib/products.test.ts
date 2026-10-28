@@ -31,6 +31,9 @@ describe("quickViewInsight", () => {
   it("says what the prototype says for the sample numbers", () => {
     expect(quickViewInsight(QV)).toBe("More than half of people (55%) close quick view without acting. Add to Cart is the most-used action at 21%, just ahead of Product Detail at 18%.");
   });
+  it("says what is missing when only add-to-cart is tracked", () => {
+    expect(quickViewInsight({ ...QV, opened: 200, add: 50, extrasTracked: false })).toBe("25% of the people who opened quick view added to cart. Product detail, wishlist and close clicks aren’t tracked yet.");
+  });
   it("copes with nobody opening it", () => {
     expect(quickViewInsight({ ...QV, opened: 0, add: 0, detail: 0, wish: 0, closed: 0 })).toBe("Nobody has opened quick view yet this week.");
   });

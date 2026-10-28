@@ -32,6 +32,7 @@ export const ofOpened = (qv: QuickViewStats, n: number): number => (qv.opened > 
 /** The sentence under the quick view modal. */
 export function quickViewInsight(qv: QuickViewStats): string {
   if (!(qv.opened > 0)) return "Nobody has opened quick view yet this week.";
+  if (!qv.extrasTracked) return `${pct(ofOpened(qv, qv.add), 0)} of the people who opened quick view added to cart. Product detail, wishlist and close clicks aren’t tracked yet.`;
   const closed = ofOpened(qv, qv.closed);
   const acts = [
     ["Add to Cart", qv.add],

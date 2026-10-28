@@ -13,4 +13,4 @@ export const PRODUCTS: Product[] = [
 export const CATS: CategoryCount[] = [["Technology", 514], ["Watches", 412], ["Bags", 276], ["Fashion", 214]];
 export const COLOURS: ColourCount[] = [["Black", 481, "#16181d"], ["White", 382, "#f4f4f2"], ["Matte Graphite", 227, "#4a4d55"], ["Cognac", 156, "#9a5a2e"]];
 
-export const QV: QuickViewStats = { seen: 6240, btn: 1498, eye: 374, opened: 1872, heartCard: 87, add: 393, detail: 337, wish: 112, closed: 1030 };
+export const QV: QuickViewStats = { seen: 6240, btn: 1498, eye: 374, opened: 1872, heartCard: 87, add: 393, detail: 337, wish: 112, closed: 1030, extrasTracked: true };

@@ -12,6 +12,16 @@ export const VARIANT_SOURCE: Record<EventType, VariantSource> = {
   theme_toggle: "no",
 };
 
+/** The tracking table each kind of event is written to. */
+export const EVENT_TABLE: Record<EventType, string> = {
+  experiment_exposure: "experiment_tracking",
+  add_to_cart: "add_to_cart_tracking",
+  quick_view_clicked: "quickview_tracking",
+  quick_view_cart: "quick_view_cart_events",
+  whats_new_clicked: "whats_new_tracking",
+  theme_toggle: "theme_toggle_tracking",
+};
+
 /** One row exactly as stored in its table: id, anonymousId, the table's own columns, createdAt. */
 export function storedRow(e: AnalyticsEvent): Record<string, string | number | boolean | null> {
   return { id: e.rowId, anonymousId: e.visitor, ...e.props, createdAt: Number.isFinite(e.ts) ? new Date(e.ts).toISOString() : "" };

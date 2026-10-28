@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EXPS } from "@/mocks";
-import { dailyPeople, daysBetween, eachDay, expDay, hms, niceDate, presetRange, rangeError, splitTotal, ymd } from "./dates";
+import { dailyPeople, daysBetween, eachDay, hms, niceDate, presetRange, rangeError, splitTotal, ymd } from "./dates";
 
 // Expected values were produced by running the prototype's own helpers with "today" = 28 Oct 2026.
 const today = new Date(2026, 9, 28, 12);
@@ -49,23 +49,13 @@ describe("dates", () => {
     expect(splitTotal(10, 0, 1)).toEqual([]);
   });
 
-  it("dailyPeople uses the hand-set split for add-to-cart, otherwise a seeded one", () => {
-    const [addToCart, ...others] = EXPS;
-    expect(dailyPeople(addToCart).c.at(-1)).toBe(106);
-    expect(dailyPeople(addToCart).t.at(-1)).toBe(76);
-    for (const e of others) {
+  it("dailyPeople is the experiment's own daily split, and adds up to its people", () => {
+    for (const e of EXPS) {
       const dp = dailyPeople(e);
+      expect(dp).toBe(e.daily);
       expect(dp.c.reduce((a, b) => a + b, 0)).toBe(e.c.people);
       expect(dp.t.reduce((a, b) => a + b, 0)).toBe(e.t.people);
     }
-  });
-
-  it("expDay reads the daily history, then a steady pace, and nothing outside the test", () => {
-    const e = EXPS[0]; // started Oct 6
-    expect(expDay(e, d(2026, 9, 5), today)).toBeNull();
-    expect(expDay(e, d(2026, 9, 8), today)).toEqual({ c: 86, t: 90 });
-    expect(expDay(e, d(2026, 9, 12), today)).toEqual({ c: 92, t: 96 });
-    expect(expDay(e, d(2026, 9, 28), today)).toEqual({ c: 85, t: 82 });
-    expect(expDay(e, d(2026, 9, 29), today)).toBeNull();
+    expect(dailyPeople(EXPS[0]).c.at(-1)).toBe(106);
   });
 });

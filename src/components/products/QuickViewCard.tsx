@@ -20,11 +20,12 @@ const code = (t: string) => (
 export function QuickViewCard({ qv, weekLabel }: { qv: QuickViewStats; weekLabel: string }) {
   const [open, setOpen] = useState(false);
   const via = (n: number) => (qv.opened > 0 ? pct((n / qv.opened) * 100, 0) : "—");
+  const tracked = qv.extrasTracked;
   const tiles = [
     ["Opened quick view", fmt(qv.opened), pct(qv.seen > 0 ? (qv.opened / qv.seen) * 100 : NaN)],
     ["Then added to cart", fmt(qv.add), pct(ofOpened(qv, qv.add))],
-    ["Via the button", fmt(qv.btn), via(qv.btn)],
-    ["Via the eye icon", fmt(qv.eye), via(qv.eye)],
+    ["Via the button", tracked ? fmt(qv.btn) : "—", tracked ? via(qv.btn) : "Not tracked"],
+    ["Via the eye icon", tracked ? fmt(qv.eye) : "—", tracked ? via(qv.eye) : "Not tracked"],
   ];
   return (
     <Card
@@ -40,8 +41,8 @@ export function QuickViewCard({ qv, weekLabel }: { qv: QuickViewStats; weekLabel
     >
       <div className="site-pair">
         <div>
-          <div className="cap">Product card · {fmt(qv.seen)} people saw the button</div>
-          <ProductCard qv={qv} onOpen={() => setOpen(true)} />
+          <div className="cap">Product card{qv.seen > 0 ? ` · ${fmt(qv.seen)} people saw the button` : ""}</div>
+          <ProductCard qv={qv.extrasTracked ? qv : undefined} onOpen={() => setOpen(true)} />
         </div>
         <div className="w-full max-w-[380px] self-center">
           <div className="qv-outcomes !grid-cols-2">

@@ -32,7 +32,7 @@ const schema = z
     SESSION_SECRET: text.refine((v) => v.length >= 32, "must be at least 32 characters"),
     ADMIN_PASSWORD: text.refine((v) => v.length >= 12, "must be at least 12 characters"),
     GROWTHBOOK_API_HOST: text.refine((v) => /^https?:\/\/\S+$/.test(v), "must be a URL starting with http:// or https://"),
-    GROWTHBOOK_SECRET_KEY: text,
+    GROWTHBOOK_CLIENT_KEY: text.refine((v) => /^\S+$/.test(v), "must not contain spaces"),
     AI_PROVIDER: z.enum(["groq", "none"], { error: "must be groq or none" }),
     GROQ_API_KEY: optional(z.string()),
     GROQ_MODEL: optional(z.string()),

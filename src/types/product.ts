@@ -30,6 +30,8 @@ export type QuickViewStats = {
   detail: number;
   wish: number;
   closed: number;
+  /** Button views, wishlist, detail and close clicks are not recorded by the store yet. */
+  extrasTracked: boolean;
 };
 
 export type ProductsData = {
@@ -37,4 +39,6 @@ export type ProductsData = {
   cats: CategoryCount[];
   colours: ColourCount[];
   qv: QuickViewStats;
+  /** Product page views are not recorded by the store yet. */
+  viewsTracked: boolean;
 };

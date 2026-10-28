@@ -1,4 +1,6 @@
+import { splitTotal } from "@/lib/dates";
 import { rng } from "@/lib/rng";
+import { DAILY_SPLIT } from "./split";
 import type { Experiment, ExperimentSeed, LiftRange } from "@/types";
 
 const SEEDS: ExperimentSeed[] = [
@@ -59,6 +61,7 @@ function withDerived(seed: ExperimentSeed): Experiment {
     verb: seed.verb ?? "added to cart",
     metricShort: seed.metricShort ?? "add-to-cart rate",
     series,
+    daily: DAILY_SPLIT[seed.key] ?? { c: splitTotal(seed.c.people, series.c.length, seed.key.length), t: splitTotal(seed.t.people, series.c.length, seed.key.length + 3) },
     mtable: METRIC_TABLE[seed.key] ?? "",
     liftCi: LIFT_CI[seed.key] ?? [-10, 10],
     people,

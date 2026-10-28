@@ -8,11 +8,19 @@ import { ANSWERS, EVT_META, generateEvents, QV } from "@/mocks";
 import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard, InterestCard } from "./products/ProductCards";
 import { EventMixCard, PerMinuteCard } from "./events/EventCards";
 
+// The cards read through @/lib/data; here it hands out the prototype's sample data so the markup can be checked.
+const state = vi.hoisted(() => ({ products: null as null | import("@/types").ProductsData }));
+vi.mock("@/lib/data", async () => {
+  const m = await import("@/mocks");
+  const sample = { products: m.PRODUCTS, cats: m.CATS, colours: m.COLOURS, qv: m.QV, viewsTracked: true };
+  const overview = { days: m.DAYS, visitors: m.VIS, visitorsPrevWeek: m.VIS_PREV, addToCarts: m.ATC, addToCartsPrevWeek: m.ATC_PREV, flagCounts: m.FLAG_COUNTS, runningCounts: m.RUNNING_COUNTS, sources: m.SOURCES, devices: m.DEVICES, eventMeta: m.EVT_META, daily: m.DAILY };
+  return { getProducts: async () => state.products ?? sample, getOverview: async () => overview, getEvents: async () => m.generateEvents(), getEventsPerMinute: async () => m.generateEventsPerMinute(), getExperiments: async () => m.EXPS, getExperiment: async () => null, getStoreLast30: async () => null, getReportRows: async () => [] };
+});
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh() {}, push() {}, replace() {} }) }));
 
 const BAD = /NaN|undefined|Infinity|>null</;
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
-const ZERO = { seen: 0, btn: 0, eye: 0, opened: 0, heartCard: 0, add: 0, detail: 0, wish: 0, closed: 0 };
+const ZERO = { seen: 0, btn: 0, eye: 0, opened: 0, heartCard: 0, add: 0, detail: 0, wish: 0, closed: 0, extrasTracked: true };
 
 describe("Events page", () => {
   it("lists the latest 40 events with an 'ago' next to each time", () => {
@@ -52,6 +60,22 @@ describe("Products page", () => {
     const m = html(<QuickViewReplica qv={ZERO} heat />);
     expect(m).not.toMatch(BAD);
     expect(m).toContain("—");
+  });
+
+  it("with views and extra clicks untracked, the pages say so instead of showing zeros", async () => {
+    const untracked = { products: [], cats: [], colours: [], qv: { ...ZERO, opened: 20, add: 5, extrasTracked: false }, viewsTracked: false };
+    state.products = untracked;
+    const m = (await Promise.all([InterestCard(), HeatGridCard(), FunnelCard()])).map((c) => html(c)).join("");
+    state.products = null;
+    expect(m).not.toMatch(BAD);
+    expect(m).toContain("The store doesn’t record product views yet");
+    expect(m).toContain("No product activity this week");
+    expect(m).toContain("Button views not tracked yet");
+    expect(m).not.toContain("Saw quick view button");
+    expect(m).toContain("25.0% continued");
+    const modal = html(<QuickViewReplica qv={untracked.qv} heat />);
+    expect(modal).not.toMatch(BAD);
+    expect(modal.match(/class="hot/g)).toHaveLength(1); // only Add to Cart is tracked
   });
 
   it("the replica hides the numbers when click data is off", () => {

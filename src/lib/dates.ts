@@ -1,6 +1,5 @@
-import { DAILY_SPLIT } from "@/mocks/split";
 import type { DailySplit, Experiment } from "@/types";
-import { rng, seedOf, sum } from "./rng";
+import { rng, sum } from "./rng";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -70,24 +69,8 @@ export function splitTotal(total: number, n: number, seed: number): number[] {
   return out;
 }
 
-/** People shown the test each day, per variant. */
-export function dailyPeople(e: Experiment): DailySplit {
-  if (DAILY_SPLIT[e.key]) return DAILY_SPLIT[e.key];
-  const n = e.series.c.length;
-  return { c: splitTotal(e.c.people, n, e.key.length), t: splitTotal(e.t.people, n, e.key.length + 3) };
-}
-
-/** Experiment people per variant on one day (from its own daily history, then a steady pace after that). */
-export function expDay(e: Experiment, d: Date, today: Date = todayStart()): { c: number; t: number } | null {
-  const start = dayStart(new Date(e.start));
-  const i = Math.round((dayStart(d).getTime() - start.getTime()) / DAY);
-  if (!Number.isFinite(i) || i < 0 || dayStart(d) > dayStart(today)) return null;
-  const dp = dailyPeople(e);
-  if (i < dp.c.length) return { c: dp.c[i], t: dp.t[i] };
-  const r = rng(seedOf(e.key + ymd(d)));
-  const avg = e.days ? e.people / e.days / 2 : 0;
-  return { c: Math.round(avg * (0.85 + r() * 0.3)), t: Math.round(avg * (0.85 + r() * 0.3)) };
-}
+/** People who entered the test each day, per variant. */
+export const dailyPeople = (e: Pick<Experiment, "daily">): DailySplit => e.daily;
 
 /** "2026-10-21" -> a local date, or null when it isn't a real YYYY-MM-DD date. */
 export function parseYMD(s: string | null | undefined): Date | null {

@@ -20,7 +20,7 @@ const hm = (ms: number) => {
 };
 
 /**
- * The "Store · last N minutes" card (N = STORE_REFRESH_MINUTES). Refresh, and an automatic refresh every N
+ * The "Live activity · last N minutes" card (N = STORE_REFRESH_MINUTES). Refresh, and an automatic refresh every N
  * minutes while the tab is visible, reload only this card. A failed refresh keeps the old numbers.
  */
 export function StoreLast30Card({ initial, experiments }: { initial: StoreLast30; experiments: Experiment[] }) {
@@ -76,7 +76,7 @@ export function StoreLast30Card({ initial, experiments }: { initial: StoreLast30
 
   return (
     <Card
-      title={`Store · last ${n} minutes`}
+      title={`Live activity · last ${n} minutes`}
       subtitle={
         <>
           <span suppressHydrationWarning>{`${hm(data.from)} – ${hm(data.to)}`}</span> · click a test to open it

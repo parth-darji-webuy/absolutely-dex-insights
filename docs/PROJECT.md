@@ -70,6 +70,7 @@ The working rules live in `CLAUDE.md`. The important ones:
 | 6 | `7eddb67` Real data from the store database and GrowthBook | 29 Oct | Every `data.ts` function now runs real queries; GrowthBook provides the running-test list; the statistics (chance to win, lift range, people needed, verdict); "Not tracked yet" for what the store doesn't record. Demo-data SQL added. |
 | 7 | `e01ebb0` Store refresh, event details and CSV download | 29 Oct | The `/api/store/last-30`, `/api/events/detail` and `/api/reports/experiment` routes; a Store card that refreshes itself; the event drawer loading the real stored row and journey; the server-built CSV. |
 | 8 | `ff1be54` Ask your data and final check | 29 Oct | Real **Ask your data**: Groq writes the SQL, the server checks and runs it read-only, Groq explains the rows. The switch-off setting, the final check, and removal of the sample-data folder. |
+| + | `d1d0a06` Explain this experiment written by Groq | 29 Oct | The Explain drawer asks Groq for the explanation when opened, with the same number check and a fallback to the app's own words. |
 | + | `d30ad1c` Overview summary by Groq… | 29 Oct | The Overview headline written by Groq (with a safety check on its numbers), "quiet store" hints that say when the last activity was, and clearer verdict wording for very slow tests. |
 
 Two things were **deliberately dropped** along the way: the prototype's "Viewer" role and masked visitor ids (only the Admin exists), and every piece of sample data (it now lives only in small test fixtures, `src/test/fixtures.ts`).
@@ -103,6 +104,7 @@ Each phase ended with lint, type-check, tests and a production build. In total t
    │   getOverview() …         │   │ /api/events/detail   (event drawer)  │
    └───────────────────────────┘   │ /api/reports/experiment (CSV)        │
                     │              │ /api/ask             (Ask your data) │
+   │ /api/experiments/explain (Explain)   │
                     ▼              └──────────────────────────────────────┘
    ┌───────────────────────────┐                  │
    │ src/lib/store/*  queries  │◄─────────────────┘
@@ -164,7 +166,7 @@ A split-screen page with an animated store scene. One account: `designerexchange
 
 **List:** a chip for All and each status, and one card per test: its two variants, who is ahead, the lift, how sure we are ("46% sure of leader"), how many people and days, and how much data is still needed.
 
-**Detail page:** the verdict in plain words; a "traffic split" line that warns *"Uneven, check tracking"* if the last day was more than 5 points away from 50/50; a race between the two variants; both variants shown as the shopper would see them; conversion rate over time; people per day; the likely range of the true lift; and an **Explain** drawer that retells the result in words.
+**Detail page:** the verdict in plain words; a "traffic split" line that warns *"Uneven, check tracking"* if the last day was more than 5 points away from 50/50; a race between the two variants; both variants shown as the shopper would see them; conversion rate over time; people per day; the likely range of the true lift; and an **Explain** drawer that retells the result in words (written by Groq when AI is on, otherwise by the app; see section 7).
 
 Which tests appear: every test with entries in `experiment_tracking`, plus every test GrowthBook is running (a test nobody has entered yet shows 0 people). Details of the maths are in [section 6](#6-how-the-numbers-are-worked-out).
 
@@ -215,6 +217,7 @@ All routes check that you are signed in themselves (the proxy is not the only lo
 | `/api/events/detail?tbl=&id=` | GET | One event row as stored plus the visitor's journey. `tbl` must be one of the six tracking tables, `id` at most 64 characters. | 200, 400 (bad `tbl`/`id`), 401, 404 (no such row) |
 | `/api/reports/experiment?key=&from=&to=` | GET | The CSV for one test and period (rules in section 4). | 200 (CSV), 400 (bad period, with the page's wording), 401, 404 (unknown test, or *"Not running in this period"*) |
 | `/api/ask` | POST `{ "question": "…" }` | Ask your data. 1 to 300 characters, at most 10 a minute. | 200 (answer or refusal), 400, 401, 429, 502 (the query couldn’t run), 503 (AI busy, or switched off) |
+| `/api/experiments/explain` | POST `{ "key": "…" }` | The AI's explanation of one test, as `{ ok, paragraphs }` (section 7). The server loads the test itself. At most 20 a minute. | 200, 400 (no key), 401, 404 (unknown test), 429, 500, 503 (AI switched off, busy, or its reply didn't pass the checks) |
 
 ## 6. How the numbers are worked out
 
@@ -253,10 +256,15 @@ Overview compares the last 7 days with the 7 days before. If there is nothing to
 
 ### What Groq is
 
-**Groq** is a company that runs AI language models on its own servers and lets apps call them. Insights uses the model in `GROQ_MODEL` (for example `openai/gpt-oss-120b`). It is not Elon Musk's "Grok" and it is not a database: it only reads and writes text. Groq is used for two things, and both are switched off by `AI_PROVIDER=none`:
+**Groq** is a company that runs AI language models on its own servers and lets apps call them. Insights uses the model in `GROQ_MODEL` (for example `openai/gpt-oss-120b`). It is not Elon Musk's "Grok" and it is not a database: it only reads and writes text. Groq is used in three places, and all three are switched off by `AI_PROVIDER=none`:
 
-1. **Ask your data.**
-2. **The Overview headline.**
+| # | Where you see it | What Groq does | Code | Calls Groq |
+| --- | --- | --- | --- | --- |
+| 1 | **Ask** page (and ⌘K) | Writes one SQL query, then turns the rows into 1–2 sentences. | `src/app/api/ask/route.ts`, `src/lib/ask/ask.ts` | twice per question |
+| 2 | **Overview**, the headline card at the top | Writes one headline sentence from this week's totals. | `src/components/overview/SummaryCard.tsx`, `src/lib/ask/overview-summary.ts` | when the page renders (cached 30 min) |
+| 3 | **Experiment page**, the "Explain this" drawer | Writes 2–3 short paragraphs explaining that test's result. | `src/components/experiments/ExplainDrawer.tsx`, `src/app/api/experiments/explain/route.ts`, `src/lib/ask/experiment-explain.ts` | when you open the drawer (cached 30 min) |
+
+All three go through one function, `groqChat()` in `src/lib/ask/groq.ts`. It is the only place that talks to Groq: it reads `GROQ_API_KEY` and `GROQ_MODEL` from `.env` on the server (the key never reaches the browser), and when Groq is busy, slow or failing it throws an error that carries no details, so nothing sensitive can reach a log or a page.
 
 ### How a question is answered
 
@@ -278,9 +286,22 @@ Your question ──► (1) Groq writes ONE SQL query, told only about 8 tables
 
 With AI on, Groq is given this week's add-to-cart and visitor totals and each running test's name, chance and lift (no visitor data) and writes one sentence. It is used only if it is a single short line **and every number in it is one the AI was given**; otherwise the app uses its own sentence. The same figures reuse one answer for 30 minutes.
 
+### The "Explain this" drawer (experiment page)
+
+The **Explain this** button on an experiment's page opens a drawer with the result retold in plain words.
+
+1. Opening the drawer for the first time shows a loading placeholder and the tag *"Asking the AI…"* while the browser calls `POST /api/experiments/explain` with the test's key.
+2. The server looks the test up itself (`getExperiment(key)`), so the AI only ever sees real figures, never text typed by a visitor.
+3. Groq is given one JSON object about that test: its name and description, days running, each variant's label, people, conversions and rate, the lift, the chance the treatment is better, the people needed and still needed. No visitor ids and no other data.
+4. The reply is used only if it is one to five short plain paragraphs **and every number in it is one the AI was given** (rates may be rounded, and the gap between them in points is allowed). Otherwise it is dropped.
+5. When the reply is used, the tag reads *"Written by AI (Groq) from the numbers below"*. When it is not, because Groq is slow, busy, switched off or wrote a number it wasn't given, the drawer shows the app's own wording and the tag *"Written from the numbers, no AI"*. The drawer never shows an error for this.
+6. The same figures reuse one answer for 30 minutes (a failed attempt is remembered for 2 minutes), and the drawer asks only once per page visit. At most 20 requests a minute.
+
+The **Numbers used** table and the note *"Insights explains the numbers; it doesn't decide. The official result lives in GrowthBook"* are always shown and are never written by the AI. If a reply is rejected, the terminal prints one line (*"Explain: the AI's reply was not used:"* and the kind of problem), never the reply itself.
+
 ### Switching it off
 
-Set `AI_PROVIDER=none` and restart. Ask disappears from ⌘K and the header search, `/ask` says *"Ask your data is switched off"*, `/api/ask` answers 503, and the Overview headline is worded by the app. Everything else works as normal.
+Set `AI_PROVIDER=none` and restart. Ask disappears from ⌘K and the header search, `/ask` says *"Ask your data is switched off"*, `/api/ask` and `/api/experiments/explain` answer 503, and the Overview headline and the Explain drawer are worded by the app. Everything else works as normal.
 
 ## 8. Security: what protects what
 
@@ -465,7 +486,7 @@ src/
     env.ts                        .env checking
     session.ts, session-token.ts, auth.ts   sign-in and cookie
     stats.ts, tz.ts, dates.ts, format.ts, report.ts, report-period.ts   maths, days, CSV
-    ask/                          Ask: sql-check, schema, groq, rate limit, overview-summary
+    ask/                          Groq: groq (the one caller), Ask (sql-check, schema, rate limit), overview-summary, experiment-explain
   types/                          the shapes of all data
   test/fixtures.ts                small fixed data used by tests only
   generated/                      the database client (built by db:generate; not in Git)

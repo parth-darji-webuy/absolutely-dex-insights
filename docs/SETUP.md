@@ -12,7 +12,7 @@ This is the short path. For how everything works, see [PROJECT.md](PROJECT.md).
 | **Git** | already on most Macs | getting the code |
 | **A Neon database** with the store's tables | your Neon project (you need the *owner* login once) | the numbers |
 | **A GrowthBook client key** (`sdk-…`) | GrowthBook → Settings → SDK Connections | the list of running experiments |
-| **A Groq API key** (`gsk_…`), optional | https://console.groq.com → API Keys | "Ask your data" and the Overview headline. Skip it and set `AI_PROVIDER=none` |
+| **A Groq API key** (`gsk_…`), optional | https://console.groq.com → API Keys | "Ask your data", the Overview headline and the experiment "Explain this" drawer. Skip it and set `AI_PROVIDER=none` |
 
 You do **not** need a GrowthBook secret or admin key, and the app never writes to the store.
 

@@ -67,12 +67,14 @@ How Ask stays safe: the AI only writes a query. The server checks it (one `SELEC
 
 Groq is the company whose servers run the AI model behind Ask your data (here `GROQ_MODEL`, for example `openai/gpt-oss-120b`). It is not Elon Musk's "Grok", and it is not a database: it only reads and writes text.
 
-For each question Insights makes two short calls to Groq:
+Groq is used in three places: the **Ask** page, the **Overview** headline and the experiment **Explain this** drawer. For each Ask question Insights makes two short calls to Groq:
 
 1. **Question to SQL.** Groq is given the question and a list of the eight tables it may use, and writes one query. It never sees the database itself.
 2. **Rows to words.** After the server has checked and run that query, Groq is given the rows (visitor ids shortened) and writes one or two plain sentences.
 
-A third, smaller use is the headline at the top of Overview. With `AI_PROVIDER=groq`, Groq is given this week's add-to-cart and visitor totals and the running tests' names, chances and lifts (no visitor data), and writes one sentence. The page drops it and uses its own sentence if Groq is slow or fails, or if the sentence contains a number it was not given. It reuses one answer for 30 minutes, and the label under it says whether it was written by AI.
+The second use is the **Explain this** drawer on an experiment's page: when you open it, Groq is given that test's figures (variants, people, conversions, rates, lift, chance, people needed; no visitor data) and writes two or three plain paragraphs. The reply is used only if every number in it was one the AI was given; otherwise the drawer shows the app's own wording, and its tag says which one you are reading. It is cached for 30 minutes.
+
+The third, smaller use is the headline at the top of Overview. With `AI_PROVIDER=groq`, Groq is given this week's add-to-cart and visitor totals and the running tests' names, chances and lifts (no visitor data), and writes one sentence. The page drops it and uses its own sentence if Groq is slow or fails, or if the sentence contains a number it was not given. It reuses one answer for 30 minutes, and the label under it says whether it was written by AI.
 
 So the question text and the query results leave this computer and go to Groq. The database password never does, and nothing the AI writes runs until the server has checked it. Needs `GROQ_API_KEY` in `.env` (a key from your Groq account); free accounts have usage limits, which is when you see "The AI is busy, try again in a minute". Set `AI_PROVIDER=none` to stop sending anything to Groq.
 

@@ -67,6 +67,8 @@ You type: *"Which product was added the most yesterday?"*
 
 What the robot gets to see: your question and the answers it needs, with the secret name tags **shortened**. What it never sees: your passwords.
 
+The robot helps in two more places. On **Overview** it writes the one-line headline at the top. On an **experiment** page, when you press **Explain this**, it tells the story of that test in a few short paragraphs. In both places the robot is only given the numbers, and our code checks that it didn't make up a number. If it did, or if it is busy, the app writes the words itself, and a small label tells you who wrote them.
+
 If you don't want a robot involved at all, set `AI_PROVIDER=none` and it is switched off.
 
 ## 6. The secret notes (`.env`)

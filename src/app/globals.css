@@ -517,6 +517,29 @@ kbd {
 .hdr-nav > span:nth-child(3) { display: none; }
 .hdr .wn .hot, .hdr .hdr-ib .hot { top: -24px; right: 50%; transform: translateX(50%); }
 @media (max-width: 1180px) { .hdr-nav > span:nth-child(2) { display: none; } }
+/* The preview sits in cards of any width, so it shrinks by the width of its own box, not the screen. */
+.hdr-box { container-type: inline-size; width: 100%; }
+@container (max-width: 560px) {
+  .hdr-nav > span:nth-child(2) { display: none; }
+}
+@container (max-width: 470px) {
+  .hdr { gap: 8px; padding: 22px 10px 12px; }
+  .hdr-nav { gap: 9px; }
+  .hdr-nav > span:nth-child(1) { display: none; }
+  .hdr-logo small { display: none; }
+}
+@container (max-width: 360px) {
+  .hdr { gap: 6px; padding: 22px 8px 12px; }
+  .hdr-logo { font-size: 16px; }
+  .hdr-nav { font-size: 10.5px; }
+  .hdr-icons { gap: 4px; }
+  .hdr-ib { min-width: 26px; height: 28px; padding: 0 5px; }
+}
+@container (max-width: 310px) {
+  .hdr-logo { font-size: 14px; }
+  .hdr-icons .hdr-ib:not(.theme):not(.cart) { display: none; }
+  .hdr-ib.wide em { display: none; }
+}
 
 /* ============================================================
    Phase 4: Events, Products, Reports and Ask.

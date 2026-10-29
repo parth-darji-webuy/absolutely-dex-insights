@@ -131,6 +131,67 @@ function Insight({ cold, overall, total }: { cold: { name: string; views: number
   );
 }
 
+type FunnelStep = readonly [label: string, table: string, people: number];
+
+/** Two or more steps as bars, each a share of the first, with how many continued or dropped off between them. */
+function FunnelBody({ steps, emptyTitle, emptyText }: { steps: readonly FunnelStep[]; emptyTitle: string; emptyText: string }) {
+  const first = steps[0][2];
+  if (first <= 0) return <EmptyState title={emptyTitle} text={emptyText} />;
+  const share = (n: number) => (first > 0 ? (n / first) * 100 : NaN);
+  const drops = steps.slice(1).map((step, k) => ({ i: k + 1, lost: steps[k][2] - step[2], conv: steps[k][2] > 0 ? (step[2] / steps[k][2]) * 100 : NaN }));
+  const biggest = drops.reduce((a, b) => (a.lost >= b.lost ? a : b));
+  const flows = [3, 1, 1];
+  return (
+    <div className="funnel">
+      {steps.map(([l, s, v], i) => {
+        const d = drops.find((x) => x.i === i);
+        const w = share(v);
+        return (
+          <div key={l} className="contents">
+            {d && (
+              <div className={`fdrop ${d === biggest && d.lost > 0 ? "big" : ""}`}>
+                <div>
+                  <span className="arrow" />
+                </div>
+                <div>
+                  {[0, 0.6, 1.2].map((t) => (
+                    <span key={t} className="fall" style={{ animationDelay: `${t}s` }} />
+                  ))}
+                  {d === biggest && d.lost > 0 && <Icon name="warn" size="sm" />} {pct(d.conv)} continued · {fmt(d.lost)} dropped off{d === biggest && d.lost > 0 ? " · biggest drop-off" : ""}
+                </div>
+                <div />
+              </div>
+            )}
+            <div className="fstep">
+              <div className="fl">
+                <b>{l}</b>
+                {s && <span>{s}</span>}
+              </div>
+              <div className="fbar">
+                <i style={{ width: `${Number.isFinite(w) ? w : 0}%`, animationDelay: `${i * 120}ms` }} />
+                {Array.from({ length: flows[i] ?? 1 }, (_, k) => (
+                  <span
+                    key={k}
+                    className="flow"
+                    style={{ "--w": `calc(${Number.isFinite(w) ? w : 0}% - 7px)`, animationDuration: `${2.4 + i * 0.4}s`, animationDelay: `${((k * (2.4 + i * 0.4)) / (flows[i] ?? 1)).toFixed(2)}s` } as React.CSSProperties}
+                  />
+                ))}
+              </div>
+              <div className="fv">
+                {fmt(v)}
+                <span>{pct(w)} of start</span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const FUNNEL_SUBTITLE = "People this week, each step as a share of the one before";
+const ACTIVE = "any of the six tracking tables";
+
 export async function FunnelCard() {
   const { qv } = await products();
   // The store doesn't record who saw the Quick View button, so the funnel starts at "Opened quick view".
@@ -138,61 +199,35 @@ export async function FunnelCard() {
     ["Opened quick view", "quickview_tracking", qv.opened],
     ["Added to cart", "quick_view_cart_events", qv.add],
   ] as const;
-  const first = steps[0][2];
-  const share = (n: number) => (first > 0 ? (n / first) * 100 : NaN);
-  const drops = [1].map((i) => ({ i, lost: steps[i - 1][2] - steps[i][2], conv: steps[i - 1][2] > 0 ? (steps[i][2] / steps[i - 1][2]) * 100 : NaN }));
-  const biggest = drops.reduce((a, b) => (a.lost >= b.lost ? a : b));
-  const flows = [3, 1];
   return (
-    <Card title="Quick view funnel" subtitle="People this week, each step as a share of the one before" source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")] }} delay={80}>
-      {first <= 0 ? (
-        <EmptyState title="No quick view activity yet" text="The funnel fills in as people open the quick view." />
-      ) : (
-        <div className="funnel">
-          {steps.map(([l, s, v], i) => {
-            const d = drops.find((x) => x.i === i);
-            const w = share(v);
-            return (
-              <div key={l} className="contents">
-                {d && (
-                  <div className={`fdrop ${d === biggest && d.lost > 0 ? "big" : ""}`}>
-                    <div>
-                      <span className="arrow" />
-                    </div>
-                    <div>
-                      {[0, 0.6, 1.2].map((t) => (
-                        <span key={t} className="fall" style={{ animationDelay: `${t}s` }} />
-                      ))}
-                      {d === biggest && d.lost > 0 && <Icon name="warn" size="sm" />} {pct(d.conv)} continued · {fmt(d.lost)} dropped off{d === biggest && d.lost > 0 ? " · biggest drop-off" : ""}
-                    </div>
-                    <div />
-                  </div>
-                )}
-                <div className="fstep">
-                  <div className="fl">
-                    <b>{l}</b>
-                    {s && <span>{s}</span>}
-                  </div>
-                  <div className="fbar">
-                    <i style={{ width: `${Number.isFinite(w) ? w : 0}%`, animationDelay: `${i * 120}ms` }} />
-                    {Array.from({ length: flows[i] }, (_, k) => (
-                      <span
-                        key={k}
-                        className="flow"
-                        style={{ "--w": `calc(${Number.isFinite(w) ? w : 0}% - 7px)`, animationDuration: `${2.4 + i * 0.4}s`, animationDelay: `${((k * (2.4 + i * 0.4)) / flows[i]).toFixed(2)}s` } as React.CSSProperties}
-                      />
-                    ))}
-                  </div>
-                  <div className="fv">
-                    {fmt(v)}
-                    <span>{pct(w)} of start</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+    <Card title="Quick view funnel" subtitle={FUNNEL_SUBTITLE} source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")] }} delay={80}>
+      <FunnelBody steps={steps} emptyTitle="No quick view activity yet" emptyText="The funnel fills in as people open the quick view." />
+    </Card>
+  );
+}
+
+export async function WhatsNewFunnelCard() {
+  const { funnels } = await products();
+  const steps = [
+    ["Active this week", ACTIVE, funnels.people],
+    ["Opened What’s New", "whats_new_tracking", funnels.whatsNew],
+  ] as const;
+  return (
+    <Card title="What’s New funnel" subtitle={FUNNEL_SUBTITLE} source={{ tables: [code("whats_new_tracking")] }} delay={100}>
+      <FunnelBody steps={steps} emptyTitle="No activity yet" emptyText="The funnel fills in as people use the shop." />
+    </Card>
+  );
+}
+
+export async function AddToCartFunnelCard() {
+  const { funnels } = await products();
+  const steps = [
+    ["Active this week", ACTIVE, funnels.people],
+    ["Added to cart", "add_to_cart_tracking", funnels.addToCart],
+  ] as const;
+  return (
+    <Card title="Add to cart funnel" subtitle={FUNNEL_SUBTITLE} source={{ tables: [code("add_to_cart_tracking")] }} delay={120}>
+      <FunnelBody steps={steps} emptyTitle="No activity yet" emptyText="The funnel fills in as people use the shop." />
     </Card>
   );
 }

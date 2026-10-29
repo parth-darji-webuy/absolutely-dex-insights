@@ -13,7 +13,7 @@ export const PRODUCTS: Product[] = [
 export const CATS: CategoryCount[] = [["Technology", 514], ["Watches", 412], ["Bags", 276], ["Fashion", 214]];
 export const COLOURS: ColourCount[] = [["Black", 481, "#16181d"], ["White", 382, "#f4f4f2"], ["Matte Graphite", 227, "#4a4d55"], ["Cognac", 156, "#9a5a2e"]];
 export const QV: QuickViewStats = { seen: 6240, btn: 1498, eye: 374, opened: 1872, heartCard: 87, add: 393, detail: 337, wish: 112, closed: 1030, extrasTracked: true };
-export const PRODUCTS_DATA: ProductsData = { products: PRODUCTS, cats: CATS, colours: COLOURS, qv: QV, viewsTracked: true };
+export const PRODUCTS_DATA: ProductsData = { products: PRODUCTS, cats: CATS, colours: COLOURS, qv: QV, funnels: { people: 4200, whatsNew: 610, addToCart: 1180 }, viewsTracked: true };
 
 const DAYS = ["2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10", "2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16"];
 

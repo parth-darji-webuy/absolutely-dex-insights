@@ -8,7 +8,7 @@ import { QuickViewReplica } from "@/components/site/QuickViewReplica";
 import { EVENT_META as EVT_META } from "@/lib/event-meta";
 import { makeEvents, QV } from "@/test/fixtures";
 import type { Answer } from "@/types";
-import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard } from "./products/ProductCards";
+import { AddToCartFunnelCard, CategoriesCard, ColoursCard, FunnelCard, HeatGridCard, WhatsNewFunnelCard } from "./products/ProductCards";
 import { EventMixCard, PerMinuteCard } from "./events/EventCards";
 
 // The cards read through @/lib/data; here it hands out fixed test data so the markup can be checked.
@@ -82,6 +82,24 @@ describe("Products page", () => {
     expect(m).toContain("Share of 1,416 add-to-carts");
   });
 
+  it("draws the What's New and Add to cart funnels from the week's people", async () => {
+    const m = (await Promise.all([WhatsNewFunnelCard(), AddToCartFunnelCard()])).map((c) => html(c)).join("");
+    expect(m).not.toMatch(BAD);
+    expect(m).toContain("What’s New funnel");
+    expect(m).toContain("Add to cart funnel");
+    expect(m).toContain("Active this week");
+    expect(m).toContain("14.5% of start"); // 610 of 4,200
+    expect(m).toContain("28.1% of start"); // 1,180 of 4,200
+  });
+
+  it("says there is no activity, not zeros or NaN, when nobody was active", async () => {
+    state.products = { products: [], cats: [], colours: [], qv: { ...ZERO }, funnels: { people: 0, whatsNew: 0, addToCart: 0 }, viewsTracked: false };
+    const m = (await Promise.all([WhatsNewFunnelCard(), AddToCartFunnelCard()])).map((c) => html(c)).join("");
+    state.products = null;
+    expect(m).not.toMatch(BAD);
+    expect(m).toContain("No activity yet");
+  });
+
   it("the quick view replica shows zeros and dashes, never NaN, when nobody opened it", () => {
     const m = html(<QuickViewReplica qv={ZERO} heat />);
     expect(m).not.toMatch(BAD);
@@ -89,7 +107,7 @@ describe("Products page", () => {
   });
 
   it("with views and extra clicks untracked, the pages show only what is tracked instead of zeros", async () => {
-    const untracked = { products: [], cats: [], colours: [], qv: { ...ZERO, opened: 20, add: 5, extrasTracked: false }, viewsTracked: false };
+    const untracked = { products: [], cats: [], colours: [], qv: { ...ZERO, opened: 20, add: 5, extrasTracked: false }, funnels: { people: 0, whatsNew: 0, addToCart: 0 }, viewsTracked: false };
     state.products = untracked;
     const m = (await Promise.all([HeatGridCard(), FunnelCard()])).map((c) => html(c)).join("");
     state.products = null;

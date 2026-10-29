@@ -1,7 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ActivityChart } from "@/components/overview/ActivityChart";
-import { DeviceRows } from "@/components/overview/DeviceRows";
 import { FlagsKpi } from "@/components/overview/FlagsKpi";
 import { RunCard } from "@/components/overview/RunCard";
 import { StoreScene } from "@/components/overview/StoreScene";
@@ -112,13 +111,6 @@ describe("Overview pieces", () => {
   it("says whether the summary was written by AI or by the app's own rules", () => {
     expect(html(<SummaryBody line="x" numbers={<b>1</b>} />)).toContain("Written from the numbers below, no AI");
     expect(html(<SummaryBody line="x" numbers={<b>1</b>} written="ai" />)).toContain("Written by AI (Groq) from the numbers below");
-  });
-
-  it("handles devices with no visitors", () => {
-    const rows = [{ label: "Mobile", visitors: 0, addToCarts: 0, color: "red" }];
-    const out = html(<DeviceRows rows={rows} total={0} best={null} note={null} />);
-    expect(out).not.toMatch(BAD);
-    expect(out).toContain("—");
   });
 
   it("draws the activity chart with no days", () => {

@@ -49,7 +49,6 @@ describe("with an empty database", () => {
     const [overview, store, exps, one, events, perMinute, products, rows] = all;
     expect(overview.days).toHaveLength(7);
     expect(overview.visitors).toEqual([0, 0, 0, 0, 0, 0, 0]);
-    expect(overview.sources).toEqual([]);
     expect(store.visitors).toBe(0);
     expect(store.zones.map((z) => z.n)).toEqual([0, 0, 0, 0, 0]);
     expect(exps).toEqual([]);

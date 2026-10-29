@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ActivityCard, DevicesCard, SourcesCard, StoreCard, TopProductsCard } from "@/components/overview/OverviewCards";
+import { ActivityCard, StoreCard, TopProductsCard } from "@/components/overview/OverviewCards";
 import { ExperimentsKpi, FeaturesKpi, VisitorsKpi } from "@/components/overview/KpiCards";
 import { SummaryCard } from "@/components/overview/SummaryCard";
 import { PageHeading } from "@/components/shell/PageHeading";
@@ -43,15 +43,6 @@ export default function Page() {
         </CardSlot>
         <CardSlot title="Top products" subtitle="By add to cart this week" skeleton="list" delay={150}>
           <TopProductsCard />
-        </CardSlot>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 max-[820px]:grid-cols-1">
-        <CardSlot title="Where visitors come from" skeleton="chart" delay={160}>
-          <SourcesCard />
-        </CardSlot>
-        <CardSlot title="Devices" subtitle="Share of visitors and how often each adds to cart" skeleton="list" delay={190}>
-          <DevicesCard />
         </CardSlot>
       </div>
     </>

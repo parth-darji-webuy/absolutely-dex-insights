@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
-import { Donut } from "@/components/charts";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getStoreLast30 } from "@/lib/data";
@@ -10,7 +9,6 @@ import { sum } from "@/lib/rng";
 import type { EventType } from "@/types";
 import { ActivityChart } from "./ActivityChart";
 import { AllTables } from "./AllTables";
-import { DeviceRows } from "./DeviceRows";
 import { StoreLast30Card } from "./StoreLast30Card";
 
 export async function StoreCard() {
@@ -78,47 +76,6 @@ export async function TopProductsCard() {
             </div>
           ))}
         </div>
-      )}
-    </Card>
-  );
-}
-
-const SOURCE_COLOURS = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)"];
-
-export async function SourcesCard() {
-  const o = await overview();
-  const segments = o.sources.map((s, i) => ({ label: s.label, value: s.value, color: SOURCE_COLOURS[i % SOURCE_COLOURS.length] }));
-  const total = sum(o.visitors);
-  return (
-    <Card title="Where visitors come from" subtitle={`${fmt(total)} visitors this week`} source={{ tables: [], gap: "Not tracked yet: needs a referrer column" }} delay={160}>
-      {segments.length === 0 ? <EmptyState title="Not tracked yet" text="The store doesn’t record where visitors come from yet." /> : <Donut segments={segments} center={fmt(total)} sub="visitors" />}
-    </Card>
-  );
-}
-
-const DEVICE_COLOURS: Record<string, string> = { Mobile: "var(--c2)", Desktop: "var(--c1)", Tablet: "var(--c3)" };
-
-export async function DevicesCard() {
-  const o = await overview();
-  const rows = o.devices.map((d, i) => ({ ...d, color: DEVICE_COLOURS[d.label] ?? SOURCE_COLOURS[i % SOURCE_COLOURS.length] }));
-  const total = sum(rows.map((d) => d.visitors));
-  const rate = (d: { visitors: number; addToCarts: number }) => (d.visitors > 0 ? (d.addToCarts / d.visitors) * 100 : -1);
-  const best = rows.reduce<(typeof rows)[number] | null>((m, d) => (!m || rate(d) > rate(m) ? d : m), null);
-  const biggest = rows.reduce<(typeof rows)[number] | null>((m, d) => (!m || d.visitors > m.visitors ? d : m), null);
-  let note: string | null = null;
-  if (best && biggest && total > 0 && rate(best) >= 0) {
-    const share = Math.round((biggest.visitors / total) * 100);
-    note =
-      best.label === biggest.label
-        ? `${best.label} visitors add to cart most often (${pct(rate(best))}), and they are ${share}% of traffic.`
-        : `${best.label} visitors add to cart most often (${pct(rate(best))}), but ${share}% of traffic is ${biggest.label.toLowerCase()}.`;
-  }
-  return (
-    <Card title="Devices" subtitle="Share of visitors and how often each adds to cart" source={{ tables: [], gap: "Not tracked yet: needs a device column" }} delay={190}>
-      {rows.length === 0 ? (
-        <EmptyState title="Not tracked yet" text="The store doesn’t record which device people use yet." />
-      ) : (
-        <DeviceRows rows={rows} total={total} best={best?.label ?? null} note={note} />
       )}
     </Card>
   );

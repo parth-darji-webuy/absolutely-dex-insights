@@ -81,9 +81,6 @@ export async function loadOverview(now: Date = new Date()): Promise<Overview> {
     addToCartsPrevWeek: prevAtc,
     flagCounts: days.map(() => flags),
     runningCounts: days.map((d) => experiments.filter((e) => e.status === "Running" && ymd(new Date(e.start)) <= d).length),
-    // The store records no referrer or device, so these stay empty (the cards say "Not tracked yet").
-    sources: [],
-    devices: [],
     eventMeta: EVENT_META,
     daily,
   };

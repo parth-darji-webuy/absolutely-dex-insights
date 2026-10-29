@@ -95,8 +95,6 @@ export const OVERVIEW: Overview = {
   addToCartsPrevWeek: 1200,
   flagCounts: [2, 3, 3, 4, 4, 4, 4],
   runningCounts: [3, 4, 4, 4, 4, 4, 4],
-  sources: [],
-  devices: [],
   eventMeta: EVENT_META,
   daily: { experiment_exposure: daily(880), add_to_cart: daily(178), quick_view_clicked: daily(240), theme_toggle: daily(60), whats_new_clicked: daily(34), quick_view_cart: daily(49) },
 };

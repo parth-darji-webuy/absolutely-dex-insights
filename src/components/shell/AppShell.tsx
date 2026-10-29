@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
+import { AskAiButton } from "./AskAiButton";
 import { AskBar } from "./AskBar";
 import { Sidebar } from "./Sidebar";
 
@@ -32,6 +33,7 @@ export function AppShell({ account, children }: AppShellProps) {
             <Icon name="menu" />
           </Button>
           <AskBar />
+          <AskAiButton />
           {account}
         </header>
         <main className="page" id="page">

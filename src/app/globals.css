@@ -296,24 +296,28 @@ kbd {
   align-items: center;
   gap: 10px;
   flex: 1 1 auto;
-  max-width: 880px;
   min-width: 0;
-  height: 42px;
+  height: 44px;
   padding: 0 8px 0 14px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
   color: var(--text3);
   font-size: 14px;
   cursor: text;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
+.askbar > svg { flex: none; color: var(--accent); }
 .askbar span { flex: 1; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .askbar .short { display: none; }
-.askbar kbd { flex: none; background: var(--card); border-color: var(--border); }
-.askbar:hover { background: var(--card); border-color: var(--border2); }
+.askbar kbd { flex: none; padding: 3px 8px; border-radius: 7px; background: var(--card); border-color: var(--border2); color: var(--text2); box-shadow: 0 1px 0 var(--border2); }
+.askbar:hover { background: var(--card); border-color: var(--accent); box-shadow: 0 2px 10px var(--accent-soft); }
 .askbar:focus-visible { outline: none; background: var(--card); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.acct { display: flex; align-items: center; gap: 10px; flex: none; min-width: 0; margin-left: auto; }
+.ask-ai { flex: none; margin-left: auto; height: 44px; padding: 0 16px; border-radius: 12px; box-shadow: 0 2px 8px var(--accent-soft); }
+.ask-ai + .acct { margin-left: 0; }
+.ask-ai:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.acct { display: flex; align-items: center; flex: none; margin-left: auto; }
 .avatar {
   display: grid;
   place-items: center;
@@ -326,11 +330,17 @@ kbd {
   font-weight: 600;
   background: linear-gradient(135deg, #3b5bff, #a54bf5);
 }
-.acct .who { display: flex; flex-direction: column; min-width: 0; max-width: 240px; line-height: 1.35; }
-.acct .who b { overflow: hidden; font-size: 13.5px; font-weight: 600; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
-.acct .who span { overflow: hidden; font-size: 12px; color: var(--text3); text-overflow: ellipsis; white-space: nowrap; }
-.acct .signout { height: 36px; margin-left: 8px; color: var(--text2); }
-.acct .signout:hover { color: var(--text); border-color: var(--border2); background: var(--hover); }
+.avatar-btn { border: 0; cursor: pointer; transition: box-shadow 0.15s, transform 0.15s; }
+.avatar-btn:hover, .avatar-btn[data-open="true"] { box-shadow: 0 0 0 3px var(--accent-soft); }
+.avatar-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent); }
+.acct-head { display: flex; flex-direction: column; gap: 2px; padding: 16px 16px 14px; border-bottom: 1px solid var(--border); }
+.acct-head b { overflow: hidden; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.acct-email { overflow: hidden; font-size: 13px; color: var(--text2); text-overflow: ellipsis; white-space: nowrap; }
+.acct-role { align-self: flex-start; margin-top: 8px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 11.5px; font-weight: 600; }
+.acct-foot { padding: 6px; }
+.acct-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 38px; padding: 0 10px; border: 0; border-radius: 8px; background: none; color: var(--text); font-size: 14px; text-align: left; cursor: pointer; transition: background 0.12s; }
+.acct-item:hover { background: var(--hover); }
+.acct-item:focus-visible { outline: none; background: var(--hover); box-shadow: inset 0 0 0 2px var(--accent-soft); }
 
 .page { width: 100%; max-width: 1380px; margin: 0 auto; padding: 32px 32px 140px; display: flex; flex-direction: column; gap: 24px; }
 .page-h h1 { font-size: 34px; font-weight: 400; letter-spacing: -0.025em; line-height: 1.15; }
@@ -358,10 +368,10 @@ kbd {
   .app.mnav .brand { justify-content: flex-start; padding: 0 18px; }
   .hamburger { display: inline-flex; }
   .top { padding: 0 16px; gap: 10px; }
-  .askbar kbd, .askbar .long, .acct .who, .acct .signout span { display: none; }
+  .askbar kbd, .askbar .long { display: none; }
   .askbar .short { display: block; }
-  .acct { gap: 8px; }
-  .acct .signout { width: 38px; margin-left: 0; padding: 0; }
+  .ask-ai { width: 44px; padding: 0; }
+  .ask-ai span { display: none; }
   .page { padding: 20px 16px 140px; }
   .page-h h1 { font-size: 26px; }
 }

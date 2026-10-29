@@ -10,7 +10,7 @@ vi.mock("./groq", () => ({
   },
 }));
 
-const { aiExplainExperiment, cleanExplanation, explainFacts, explainIsGrounded } = await import("./experiment-explain");
+const { aiExplainExperiment, cleanExplanation, explainFacts, explainIsGrounded, ungroundedNumbers } = await import("./experiment-explain");
 const { EXPS } = await import("@/test/fixtures");
 
 const e = EXPS[0];
@@ -29,6 +29,12 @@ describe("explainIsGrounded", () => {
     expect(explainIsGrounded(`${facts.chancePercent}% chance, with ${facts.control.people} people in control.`, facts)).toBe(true);
     expect(explainIsGrounded("Nobody has seen it yet.", facts)).toBe(true);
     expect(explainIsGrounded("A lift of 123456%.", facts)).toBe(false);
+  });
+
+  it("accepts a number that is part of the test's own wording, and lists the strays", () => {
+    const named = { ...facts, name: "Free shipping over 50 pounds", treatment: { ...facts.treatment, label: "Variant 3" } };
+    expect(explainIsGrounded("Variant 3 offers shipping over 50 pounds.", named)).toBe(true);
+    expect(ungroundedNumbers("Variant 3 and 987654 people.", named)).toEqual(["987654"]);
   });
 });
 

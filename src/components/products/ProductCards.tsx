@@ -241,15 +241,3 @@ export async function ColoursCard() {
     </Card>
   );
 }
-
-export function NotTrackedNote() {
-  return (
-    <div className="warnbar fade">
-      <Icon name="info" />
-      <span>
-        Product <b>views</b> and <b>quick view button views</b> aren’t tracked in your database yet, so they aren’t shown. Quick views and add-to-carts come from your tables.
-      </span>
-    </div>
-  );
-}
-

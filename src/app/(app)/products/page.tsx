@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard, NotTrackedNote } from "@/components/products/ProductCards";
+import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard } from "@/components/products/ProductCards";
 import { PageHeading } from "@/components/shell/PageHeading";
 import { CardSlot } from "@/components/ui/CardSlot";
 
@@ -9,7 +9,6 @@ export default function Page() {
   return (
     <>
       <PageHeading page="products" />
-      <NotTrackedNote />
       <CardSlot title="Product heat grid" subtitle="This week · darker = hotter within each column" skeleton="table">
         <HeatGridCard />
       </CardSlot>

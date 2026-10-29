@@ -49,7 +49,7 @@ export async function HeatGridCard() {
           Cool <i /> Hot
         </span>
       }
-      source={{ tables: [code('"Product"'), code("quickview_tracking"), code("add_to_cart_tracking")], gap: viewsTracked ? undefined : "Views not tracked yet" }}
+      source={{ tables: [code('"Product"'), code("quickview_tracking"), code("add_to_cart_tracking")] }}
     >
       {rows.length === 0 ? (
         <EmptyState title="No product activity this week" text="Products show up here once people open their quick view or add them to the cart." />
@@ -144,7 +144,7 @@ export async function FunnelCard() {
   const biggest = drops.reduce((a, b) => (a.lost >= b.lost ? a : b));
   const flows = [3, 1];
   return (
-    <Card title="Quick view funnel" subtitle="People this week, each step as a share of the one before" source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")], gap: "Button views not tracked yet" }} delay={80}>
+    <Card title="Quick view funnel" subtitle="People this week, each step as a share of the one before" source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")] }} delay={80}>
       {first <= 0 ? (
         <EmptyState title="No quick view activity yet" text="The funnel fills in as people open the quick view." />
       ) : (

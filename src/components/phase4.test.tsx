@@ -88,14 +88,13 @@ describe("Products page", () => {
     expect(m).toContain("—");
   });
 
-  it("with views and extra clicks untracked, the pages say so instead of showing zeros", async () => {
+  it("with views and extra clicks untracked, the pages show only what is tracked instead of zeros", async () => {
     const untracked = { products: [], cats: [], colours: [], qv: { ...ZERO, opened: 20, add: 5, extrasTracked: false }, viewsTracked: false };
     state.products = untracked;
     const m = (await Promise.all([HeatGridCard(), FunnelCard()])).map((c) => html(c)).join("");
     state.products = null;
     expect(m).not.toMatch(BAD);
     expect(m).toContain("No product activity this week");
-    expect(m).toContain("Button views not tracked yet");
     expect(m).not.toContain("Saw quick view button");
     expect(m).toContain("25.0% continued");
     const modal = html(<QuickViewReplica qv={untracked.qv} heat />);

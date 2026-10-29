@@ -190,7 +190,6 @@ function FunnelBody({ steps, emptyTitle, emptyText }: { steps: readonly FunnelSt
 }
 
 const FUNNEL_SUBTITLE = "People this week, each step as a share of the one before";
-const ACTIVE = "any of the six tracking tables";
 
 export async function FunnelCard() {
   const { qv } = await products();
@@ -202,32 +201,6 @@ export async function FunnelCard() {
   return (
     <Card title="Quick view funnel" subtitle={FUNNEL_SUBTITLE} source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")] }} delay={80}>
       <FunnelBody steps={steps} emptyTitle="No quick view activity yet" emptyText="The funnel fills in as people open the quick view." />
-    </Card>
-  );
-}
-
-export async function WhatsNewFunnelCard() {
-  const { funnels } = await products();
-  const steps = [
-    ["Active this week", ACTIVE, funnels.people],
-    ["Opened What’s New", "whats_new_tracking", funnels.whatsNew],
-  ] as const;
-  return (
-    <Card title="What’s New funnel" subtitle={FUNNEL_SUBTITLE} source={{ tables: [code("whats_new_tracking")] }} delay={100}>
-      <FunnelBody steps={steps} emptyTitle="No activity yet" emptyText="The funnel fills in as people use the shop." />
-    </Card>
-  );
-}
-
-export async function AddToCartFunnelCard() {
-  const { funnels } = await products();
-  const steps = [
-    ["Active this week", ACTIVE, funnels.people],
-    ["Added to cart", "add_to_cart_tracking", funnels.addToCart],
-  ] as const;
-  return (
-    <Card title="Add to cart funnel" subtitle={FUNNEL_SUBTITLE} source={{ tables: [code("add_to_cart_tracking")] }} delay={120}>
-      <FunnelBody steps={steps} emptyTitle="No activity yet" emptyText="The funnel fills in as people use the shop." />
     </Card>
   );
 }

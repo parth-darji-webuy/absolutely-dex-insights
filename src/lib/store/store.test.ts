@@ -161,9 +161,6 @@ describe("products", () => {
       [{ name: "Black", n: 5 }, { name: "Mystery", n: 1 }],
       [{ n: 7 }],
       [{ n: 3 }],
-      [{ n: 40 }],
-      [{ n: 9 }],
-      [{ n: 12 }],
     ];
     answer = () => results[n++] ?? [];
     const p = await loadProducts(NOW);
@@ -172,7 +169,6 @@ describe("products", () => {
     expect(p.cats).toEqual([["Fashion", 24]]);
     expect(p.colours).toEqual([["Black", 5, "#16181d"], ["Mystery", 1, "#9aa0ad"]]);
     expect(p.qv).toMatchObject({ opened: 7, add: 3, seen: 0, extrasTracked: false });
-    expect(p.funnels).toEqual({ people: 40, whatsNew: 9, addToCart: 12 });
     expect(p.viewsTracked).toBe(false);
   });
 

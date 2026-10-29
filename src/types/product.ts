@@ -39,8 +39,6 @@ export type ProductsData = {
   cats: CategoryCount[];
   colours: ColourCount[];
   qv: QuickViewStats;
-  /** This week's people for the three funnels: everyone active, those who opened What's New, those who added to cart. */
-  funnels: { people: number; whatsNew: number; addToCart: number };
   /** Product page views are not recorded by the store yet. */
   viewsTracked: boolean;
 };

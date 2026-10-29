@@ -61,22 +61,7 @@ export async function loadProducts(now: Date = new Date()): Promise<ProductsData
     const [added] = await tx.$queryRaw<{ n: bigint }[]>`
       SELECT COUNT(DISTINCT c."anonymousId") AS n FROM quick_view_cart_events c
       WHERE c."eventName" = 'add_to_cart' AND c."createdAt" >= ${since} AND (((c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}`;
-    const [people] = await tx.$queryRaw<{ n: bigint }[]>`
-      SELECT COUNT(DISTINCT aid) AS n FROM (
-        SELECT c."anonymousId" AS aid FROM experiment_tracking c WHERE c."createdAt" >= ${since} AND (((c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}
-        UNION ALL SELECT c."anonymousId" FROM add_to_cart_tracking c WHERE c."createdAt" >= ${since} AND (((c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}
-        UNION ALL SELECT c."anonymousId" FROM quickview_tracking c WHERE c."createdAt" >= ${since} AND (((c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}
-        UNION ALL SELECT c."anonymousId" FROM theme_toggle_tracking c WHERE c."createdAt" >= ${since} AND (((c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}
-        UNION ALL SELECT c."anonymousId" FROM whats_new_tracking c WHERE c."createdAt" >= ${since} AND (((c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}
-        UNION ALL SELECT c."anonymousId" FROM quick_view_cart_events c WHERE c."createdAt" >= ${since} AND (((c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}
-      ) u`;
-    const [whatsNew] = await tx.$queryRaw<{ n: bigint }[]>`
-      SELECT COUNT(DISTINCT w."anonymousId") AS n FROM whats_new_tracking w
-      WHERE w."createdAt" >= ${since} AND (((w."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}`;
-    const [carted] = await tx.$queryRaw<{ n: bigint }[]>`
-      SELECT COUNT(DISTINCT a."anonymousId") AS n FROM add_to_cart_tracking a
-      WHERE a."createdAt" >= ${since} AND (((a."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::date)::text >= ${first}`;
-    return { rows, cats, colours, opened: num(opened?.n), added: num(added?.n), people: num(people?.n), whatsNew: num(whatsNew?.n), carted: num(carted?.n) };
+    return { rows, cats, colours, opened: num(opened?.n), added: num(added?.n) };
   });
 
   const products: Product[] = data.rows
@@ -102,6 +87,5 @@ export async function loadProducts(now: Date = new Date()): Promise<ProductsData
   const cats: CategoryCount[] = data.cats.map((c) => [c.name, num(c.n)] as const);
   const colours: ColourCount[] = data.colours.map((c) => [c.name, num(c.n), swatchFor(c.name)] as const);
   const qv: QuickViewStats = { seen: 0, btn: 0, eye: 0, opened: data.opened, heartCard: 0, add: data.added, detail: 0, wish: 0, closed: 0, extrasTracked: false };
-  const funnels = { people: data.people, whatsNew: data.whatsNew, addToCart: data.carted };
-  return { products, cats, colours, qv, funnels, viewsTracked: false };
+  return { products, cats, colours, qv, viewsTracked: false };
 }

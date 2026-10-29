@@ -31,3 +31,12 @@ const SETUPS: Record<string, ExperimentSetup> = {
 };
 
 export const setupFor = (key: string): ExperimentSetup => SETUPS[key] ?? ADD_TO_CART;
+
+/** Tests named one by one that the dashboard leaves out everywhere. */
+const HIDDEN_KEYS = new Set(["quick-view-style"]);
+
+/** Tests the dashboard leaves out everywhere: the ones listed above, and the GA4 copies, whose keys end in "-ga4". */
+export const isHiddenExperiment = (key: string): boolean => {
+  const k = key.toLowerCase();
+  return HIDDEN_KEYS.has(k) || k.endsWith("-ga4");
+};

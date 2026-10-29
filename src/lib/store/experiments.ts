@@ -1,5 +1,5 @@
 import "server-only";
-import { setupFor, type MetricTable } from "@/config/experiments";
+import { isHiddenExperiment, setupFor, type MetricTable } from "@/config/experiments";
 import type { Experiment, RecentWindow } from "@/types";
 import { runQuery, type Tx } from "../db";
 import { getEnv } from "../env";
@@ -87,7 +87,7 @@ async function computeExperiments(now: Date): Promise<Experiment[]> {
   ]);
   const today = localDay(now, tz);
   // Everything the store has recorded, plus tests GrowthBook is running that nobody has entered yet.
-  const keys = [...new Set([...exposures.map((r) => r.key), ...(gb?.experiments.map((x) => x.key) ?? [])])];
+  const keys = [...new Set([...exposures.map((r) => r.key), ...(gb?.experiments.map((x) => x.key) ?? [])])].filter((k) => !isHiddenExperiment(k));
   const list = keys.map((key) => {
     const rows = exposures.filter((r) => r.key === key);
     const pick = (vid: number) => rows.find((r) => r.vid === vid);

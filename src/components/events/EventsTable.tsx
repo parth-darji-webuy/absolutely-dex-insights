@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { QuickViewModal } from "@/components/products/QuickViewModal";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -25,6 +25,14 @@ export function EventsTable({ events, meta, qv, weekLabel }: Props) {
   const [selected, setSelected] = useState<AnalyticsEvent | null>(null);
   const [open, setOpen] = useState(false);
   const [quickView, setQuickView] = useState(false);
+
+  // "Ns ago" depends on the current time, so the server and the first client render would differ.
+  // Show it only in the browser: false while rendering on the server and during hydration, true after.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     const t = setInterval(() => tick((n) => n + 1), 1000);
@@ -60,7 +68,7 @@ export function EventsTable({ events, meta, qv, weekLabel }: Props) {
                     key={e.id}
                     className="click"
                     tabIndex={0}
-                    aria-label={`${meta[e.event]?.label ?? e.event}, ${ago(e.ts)}. Open details`}
+                    aria-label={`${meta[e.event]?.label ?? e.event}${mounted ? `, ${ago(e.ts)}` : ""}. Open details`}
                     onClick={() => show(e)}
                     onKeyDown={(k) => {
                       if (k.key === "Enter" || k.key === " ") {
@@ -70,7 +78,7 @@ export function EventsTable({ events, meta, qv, weekLabel }: Props) {
                     }}
                   >
                     <td className="tabular-nums" suppressHydrationWarning>
-                      <span>{clock(e.ts)}</span> <span className="text-xs text-text3">{ago(e.ts)}</span>
+                      <span>{clock(e.ts)}</span> <span className="text-xs text-text3">{mounted ? ago(e.ts) : ""}</span>
                     </td>
                     <td>
                       <EventName type={e.event} meta={meta} />

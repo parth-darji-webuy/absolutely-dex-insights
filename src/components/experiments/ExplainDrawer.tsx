@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
+import { SkeletonStack } from "@/components/ui/Skeleton";
 import { Tag } from "@/components/ui/Tag";
 import { liftText, remaining, trafficSplit } from "@/lib/experiment";
 import { fmt, pct } from "@/lib/format";
@@ -47,9 +48,27 @@ function Words({ e }: { e: Experiment }) {
   );
 }
 
-/** The "Explain this" button and the drawer it opens: plain words first, then every number used. */
-export function ExplainButton({ e }: { e: Experiment }) {
+type Written = { state: "idle" | "loading" | "rules" } | { state: "ai"; paragraphs: string[] };
+
+/**
+ * The "Explain this" button and the drawer it opens: plain words first, then every number used.
+ * With `ai` on, Groq writes the words when the drawer is first opened; if it can't, the app's own words are shown.
+ */
+export function ExplainButton({ e, ai = false }: { e: Experiment; ai?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [written, setWritten] = useState<Written>({ state: "idle" });
+  const show = () => {
+    setOpen(true);
+    if (!ai || written.state !== "idle") return;
+    setWritten({ state: "loading" });
+    fetch("/api/experiments/explain", { method: "POST", body: JSON.stringify({ key: e.key }) })
+      .then(async (res) => {
+        const body: unknown = res.ok ? await res.json() : null;
+        const paragraphs = (body as { paragraphs?: unknown } | null)?.paragraphs;
+        setWritten(Array.isArray(paragraphs) && paragraphs.length > 0 && paragraphs.every((p) => typeof p === "string") ? { state: "ai", paragraphs } : { state: "rules" });
+      })
+      .catch(() => setWritten({ state: "rules" }));
+  };
   const pace = e.days > 0 ? Math.round(e.people / e.days) : null;
   const nums: [string, string][] = [
     ["Control · people who saw it", fmt(e.c.people)],
@@ -63,7 +82,7 @@ export function ExplainButton({ e }: { e: Experiment }) {
   ];
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button onClick={show}>
         <Icon name="spark" /> Explain this
       </Button>
       <Drawer
@@ -77,11 +96,15 @@ export function ExplainButton({ e }: { e: Experiment }) {
         subtitle={e.name}
       >
         <div>
-          <Tag>Written from the numbers, no AI</Tag>
+          <Tag tone={written.state === "ai" ? "ai" : "default"}>{written.state === "ai" ? "Written by AI (Groq) from the numbers below" : written.state === "loading" ? "Asking the AI…" : "Written from the numbers, no AI"}</Tag>
         </div>
-        <div className="flex flex-col gap-3 text-sm leading-[1.6]">
-          <Words e={e} />
-        </div>
+        {written.state === "loading" ? (
+          <SkeletonStack kind="text" />
+        ) : (
+          <div className="flex flex-col gap-3 text-sm leading-[1.6]">
+            {written.state === "ai" ? written.paragraphs.map((p, i) => <p key={i}>{p}</p>) : <Words e={e} />}
+          </div>
+        )}
         <div>
           <h4 className="mb-2.5 text-xs font-semibold tracking-[.06em] text-text3 uppercase">Numbers used</h4>
           <div className="flex flex-col overflow-hidden rounded-[10px] border border-border">

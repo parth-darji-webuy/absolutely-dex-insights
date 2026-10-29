@@ -9,6 +9,7 @@ import { VariantCard } from "@/components/experiments/VariantCard";
 import { VerdictCard } from "@/components/experiments/VerdictCard";
 import { Flag } from "@/components/ui/Flag";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { getEnv } from "@/lib/env";
 import { fmt } from "@/lib/format";
 import { experiment } from "@/lib/queries";
 
@@ -48,7 +49,7 @@ export default async function Page({ params }: Props) {
               )}
             </div>
           </div>
-          <ExplainButton e={e} />
+          <ExplainButton e={e} ai={getEnv().AI_PROVIDER === "groq"} />
         </div>
       </div>
 

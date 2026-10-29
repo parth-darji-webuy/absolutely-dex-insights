@@ -98,6 +98,11 @@ describe("Overview pieces", () => {
     expect(out).not.toMatch(BAD);
   });
 
+  it("the explain drawer starts with the app's own words, with AI on or off", () => {
+    expect(html(<ExplainButton e={EXPS[0]} />)).not.toMatch(BAD);
+    expect(html(<ExplainButton e={EXPS[0]} ai />)).not.toMatch(BAD);
+  });
+
   it("starts with the numbers hidden", () => {
     const out = html(<SummaryBody line="Add-to-cart is up 18%." numbers={<b>1,416</b>} />);
     expect(out).toContain("Show the numbers");

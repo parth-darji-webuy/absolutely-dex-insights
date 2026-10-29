@@ -1,37 +1,18 @@
 import { Icon } from "@/components/Icon";
-import { ProductScatter } from "@/components/charts";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { fmt, pct } from "@/lib/format";
 import { addRate, coldProducts, heat, overallRate } from "@/lib/products";
-import { overview, products } from "@/lib/queries";
+import { products } from "@/lib/queries";
 import { sum } from "@/lib/rng";
 import type { CategoryCount, ColourCount } from "@/types";
-import { QuickViewCard } from "./QuickViewCard";
 
 const code = (t: string) => (
   <code key={t} className="rounded-[5px] border border-border bg-card2 px-1.5 py-px text-[11px] text-text2">
     {t}
   </code>
 );
-
-export async function InterestCard() {
-  const { products: list, viewsTracked } = await products();
-  if (!viewsTracked)
-    return (
-      <Card title="Interest vs conversion" subtitle="Each bubble is a product · bigger = more add-to-carts · hover for numbers" source={{ tables: [code("add_to_cart_tracking")], gap: "Views not tracked yet" }} delay={40}>
-        <EmptyState title="Not tracked yet" text="The store doesn’t record product views yet, so views can’t be compared with add-to-carts." />
-      </Card>
-    );
-  return (
-    <Card title="Interest vs conversion" subtitle="Each bubble is a product · bigger = more add-to-carts · hover for numbers" source={{ tables: [code("add_to_cart_tracking")], gap: "Views not tracked yet" }} delay={40}>
-      <div className="mx-auto max-w-[860px]">
-        <ProductScatter products={list} />
-      </div>
-    </Card>
-  );
-}
 
 const ALL_COLS = [
   ["views", "Views"],
@@ -214,13 +195,6 @@ export async function FunnelCard() {
       )}
     </Card>
   );
-}
-
-export async function YourQuickViewCard() {
-  const [{ qv }, o] = await Promise.all([products(), overview()]);
-  const days = o.days;
-  const weekLabel = days.length ? `${days[0]}${days.length > 1 ? ` – ${days.at(-1)?.split(" ").pop()}` : ""}` : "";
-  return <QuickViewCard qv={qv} weekLabel={weekLabel} />;
 }
 
 function Bars({ items, swatch, total }: { items: readonly (CategoryCount | ColourCount)[]; swatch?: boolean; total: number }) {

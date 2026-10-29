@@ -2,8 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Delta } from "@/components/ui/Delta";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PRODUCTS } from "@/test/fixtures";
-import { AreaChart, BarChart, Donut, HBars, LiftRange, MiniBars, ProductScatter, Sparkline, XSpark } from ".";
+import { AreaChart, BarChart, Donut, HBars, LiftRange, MiniBars, Sparkline, XSpark } from ".";
 
 const BAD = /NaN|undefined|Infinity/;
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
@@ -31,9 +30,6 @@ describe("charts never print NaN, undefined or Infinity", () => {
     ["Donut empty", <Donut key="17" segments={[]} />],
     ["Donut all zero", <Donut key="18" segments={[{ label: "a", value: 0, color: "red" }, { label: "b", value: 0, color: "blue" }]} />],
     ["Donut one segment", <Donut key="19" segments={[{ label: "a", value: 5, color: "red" }]} center="5" sub="total" />],
-    ["ProductScatter empty", <ProductScatter key="20" products={[]} />],
-    ["ProductScatter no views", <ProductScatter key="21" products={PRODUCTS.map((p) => ({ ...p, views: 0, atc: 0 }))} />],
-    ["ProductScatter sample", <ProductScatter key="22" products={PRODUCTS} />],
     ["LiftRange sample", <LiftRange key="23" lift={20} range={[-3, 45]} lead />],
     ["LiftRange flat", <LiftRange key="24" lift={0} range={[0, 0]} />],
     ["LiftRange broken", <LiftRange key="25" lift={NaN} range={[NaN, NaN]} />],
@@ -52,7 +48,6 @@ describe("charts never print NaN, undefined or Infinity", () => {
   it("empty data shows the empty state, not a broken chart", () => {
     expect(html(<AreaChart labels={[]} series={[]} />)).toContain("No data yet");
     expect(html(<AreaChart labels={["a"]} series={series([1])} hidden={["a"]} />)).toContain("All series hidden");
-    expect(html(<ProductScatter products={[]} />)).toContain("No products yet");
     expect(html(<HBars rows={[]} />)).toContain("No data yet");
   });
 

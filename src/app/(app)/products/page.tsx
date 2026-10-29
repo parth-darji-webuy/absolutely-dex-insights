@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard, InterestCard, NotTrackedNote, YourQuickViewCard } from "@/components/products/ProductCards";
+import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard, NotTrackedNote } from "@/components/products/ProductCards";
 import { PageHeading } from "@/components/shell/PageHeading";
 import { CardSlot } from "@/components/ui/CardSlot";
 
@@ -10,17 +10,11 @@ export default function Page() {
     <>
       <PageHeading page="products" />
       <NotTrackedNote />
-      <CardSlot title="Interest vs conversion" subtitle="Each bubble is a product · bigger = more add-to-carts · hover for numbers" delay={40}>
-        <InterestCard />
-      </CardSlot>
       <CardSlot title="Product heat grid" subtitle="This week · darker = hotter within each column" skeleton="table">
         <HeatGridCard />
       </CardSlot>
       <CardSlot title="Quick view funnel" subtitle="People this week, each step as a share of the one before" delay={80}>
         <FunnelCard />
-      </CardSlot>
-      <CardSlot title="Your quick view, with click data" subtitle="How people use the Quick View on your product cards this week" delay={110}>
-        <YourQuickViewCard />
       </CardSlot>
       <div className="grid grid-cols-2 gap-4 max-[820px]:grid-cols-1">
         <CardSlot title="Popular categories" subtitle="Share of add-to-carts" skeleton="list" delay={140}>

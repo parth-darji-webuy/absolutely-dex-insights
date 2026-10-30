@@ -81,7 +81,7 @@ export function AskPanel({ suggestions, initialQuestion }: Props) {
       <section className="ask-hero fade rounded-lg border border-border shadow-[0_1px_2px_rgba(16,24,40,.04)]">
         <div>
           <h2 className="text-lg font-semibold tracking-[-.015em]">Ask your data</h2>
-          <p className="mt-0.5 text-text2">Plain-English answers from your events. Every answer shows the numbers and query behind it.</p>
+          <p className="mt-0.5 text-text2">Plain-English answers from your events.</p>
         </div>
         <form className="ask-input" onSubmit={submit}>
           <Icon name="spark" />

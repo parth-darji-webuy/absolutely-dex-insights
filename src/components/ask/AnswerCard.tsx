@@ -99,36 +99,6 @@ export function AnswerCard({ item, index }: { item: AskItem; index: number }) {
         </div>
         <TypedText text={a.a} animate={item.fresh} />
         <HBars rows={a.bars} unit={a.unit === "%" ? "%" : ""} />
-        <details>
-          <summary>
-            <Icon name="chev" size="sm" className="chev" /> Show the query / numbers
-          </summary>
-          <div className="inner">
-            <table className="mini">
-              <thead>
-                <tr>
-                  {a.cols.map((c, j) => (
-                    <th key={c} className={j ? "r" : ""}>
-                      {c}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {a.rows.map((r, i) => (
-                  <tr key={i}>
-                    {r.map((c, j) => (
-                      <td key={j} className={j ? "r" : ""}>
-                        {c}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <pre className="query">{a.sql}</pre>
-          </div>
-        </details>
       </div>
     </Card>
   );

@@ -122,7 +122,8 @@ describe("Ask page", () => {
   it("shows thinking, the answer and the couldn't-match card", () => {
     expect(html(<AnswerCard item={{ ...item, state: "thinking" }} index={0} />)).toContain("Looking at your events…");
     const done = html(<AnswerCard item={{ ...item, state: "answer", answer: BUY_NOW, fresh: false }} index={0} />);
-    expect(done).toContain("Show the query / numbers");
+    expect(done).not.toContain("Show the query");
+    expect(done).not.toContain("SELECT");
     expect(done).toContain("AI answer · Groq");
     expect(done).toContain("94% sure");
     expect(done).not.toMatch(BAD);

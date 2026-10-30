@@ -10,14 +10,14 @@ import { EventDrawer } from "./EventDrawer";
 import { EventName } from "./EventName";
 
 type Props = {
-  /** Newest first. The table shows the latest 40; the drawer's journey looks at all of them. */
+  /** Newest first. The table shows the latest 20; the drawer's journey looks at all of them. */
   events: AnalyticsEvent[];
   meta: Record<EventType, EventMeta>;
   qv: QuickViewStats;
   weekLabel: string;
 };
 
-const SHOWN = 40;
+const SHOWN = 20;
 
 /** The latest events. Each "35s ago" keeps counting, and a row opens the drawer. */
 export function EventsTable({ events, meta, qv, weekLabel }: Props) {

@@ -3,7 +3,6 @@ import type { CSSProperties } from "react";
 import { XSpark } from "@/components/charts";
 import { Flag } from "@/components/ui/Flag";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { cn } from "@/lib/cn";
 import { treatmentColour } from "@/lib/experiment";
 import { fmt } from "@/lib/format";
 import type { Experiment } from "@/types";
@@ -18,7 +17,6 @@ const Stat = ({ value, label }: { value: string; label: string }) => (
 
 /** One test on the Experiments page. The whole card opens the test. */
 export function ExperimentCard({ e, delay = 0 }: { e: Experiment; delay?: number }) {
-  const done = e.progress >= 100;
   return (
     <Link
       href={`/experiments/${e.key}`}
@@ -47,21 +45,10 @@ export function ExperimentCard({ e, delay = 0 }: { e: Experiment; delay?: number
         </span>
       </div>
       <XSpark control={e.series.c} treatment={e.series.t} lead={e.lead} />
-      <div className="grid grid-cols-3 gap-2 border-y border-border py-3">
+      <div className="grid grid-cols-3 gap-2 border-t border-border pt-3">
         <Stat value={fmt(e.people)} label="people in test" />
         <Stat value={fmt(e.days)} label="days running" />
         <Stat value={e.chance == null ? "—" : `${e.chance}%`} label="sure of leader" />
-      </div>
-      <div>
-        <div className="h-1.5 overflow-hidden rounded-[3px] border border-border bg-card2">
-          <i className={cn("grow-x block h-full rounded-[3px]", done ? "bg-text2" : "bg-text3")} style={{ width: `${Math.min(100, Math.max(0, e.progress))}%`, animationDuration: "1s" }} />
-        </div>
-        <div className="mt-1.5 flex justify-between text-xs text-text3 tabular-nums">
-          <span>Data needed</span>
-          <span>
-            {fmt(e.people)} of {fmt(e.needed)} · {e.progress}%
-          </span>
-        </div>
       </div>
     </Link>
   );

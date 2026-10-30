@@ -32,23 +32,35 @@ export function parseFeatures(payload: unknown): GbSnapshot {
 }
 
 const TTL_MS = 60_000;
+/** A failed read is retried soon, so one network blip doesn't hide GrowthBook for a whole minute. */
+const FAILED_TTL_MS = 5_000;
+const ATTEMPTS = 2;
 let cache: { at: number; value: GbSnapshot | null } | undefined;
+
+const reason = (error: unknown): string => {
+  if (!(error instanceof Error)) return "unknown error";
+  const cause = (error as Error & { cause?: { code?: string; message?: string } }).cause;
+  return `${error.name}${cause?.code || cause?.message ? ` (${cause.code ?? cause.message})` : ""}`;
+};
 
 /** The flags and running experiments in GrowthBook, or null if it can't be reached. Cached for a minute. */
 export async function getGrowthBook(): Promise<GbSnapshot | null> {
-  if (cache && Date.now() - cache.at < TTL_MS) return cache.value;
+  if (cache && Date.now() - cache.at < (cache.value ? TTL_MS : FAILED_TTL_MS)) return cache.value;
   const { GROWTHBOOK_API_HOST, GROWTHBOOK_CLIENT_KEY } = getEnv();
+  const url = `${GROWTHBOOK_API_HOST.replace(/\/+$/, "")}/api/features/${encodeURIComponent(GROWTHBOOK_CLIENT_KEY)}`;
   let value: GbSnapshot | null = null;
-  try {
-    const res = await fetch(`${GROWTHBOOK_API_HOST.replace(/\/+$/, "")}/api/features/${encodeURIComponent(GROWTHBOOK_CLIENT_KEY)}`, {
-      method: "GET",
-      cache: "no-store",
-      signal: AbortSignal.timeout(5000),
-    });
-    if (res.ok) value = parseFeatures(await res.json());
-    else console.error(`GrowthBook answered with status ${res.status}.`);
-  } catch (error) {
-    console.error("GrowthBook could not be reached:", error instanceof Error ? error.name : "unknown error");
+  for (let attempt = 1; attempt <= ATTEMPTS && !value; attempt++) {
+    try {
+      const res = await fetch(url, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(5000) });
+      if (res.ok) value = parseFeatures(await res.json());
+      else {
+        console.warn(`GrowthBook answered with status ${res.status}.`);
+        break;
+      }
+    } catch (error) {
+      // A network failure is usually a one-off: try once more, then carry on without GrowthBook.
+      if (attempt === ATTEMPTS) console.warn("GrowthBook could not be reached:", reason(error));
+    }
   }
   cache = { at: Date.now(), value };
   return value;

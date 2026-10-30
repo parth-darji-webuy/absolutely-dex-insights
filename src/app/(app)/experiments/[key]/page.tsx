@@ -6,11 +6,9 @@ import { ConversionCard, LiftCard, PeoplePerDayCard, RaceCard } from "@/componen
 import { ExplainButton } from "@/components/experiments/ExplainDrawer";
 import { TrafficLine } from "@/components/experiments/TrafficLine";
 import { VariantCard } from "@/components/experiments/VariantCard";
-import { VerdictCard } from "@/components/experiments/VerdictCard";
 import { Flag } from "@/components/ui/Flag";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getEnv } from "@/lib/env";
-import { fmt } from "@/lib/format";
 import { experiment } from "@/lib/queries";
 
 type Props = { params: Promise<{ key: string }> };
@@ -24,7 +22,6 @@ export default async function Page({ params }: Props) {
   const e = await experiment((await params).key);
   if (!e) notFound();
 
-  const thin = e.status === "Running" && e.progress < 50;
   return (
     <>
       <div className="fade">
@@ -53,16 +50,6 @@ export default async function Page({ params }: Props) {
         </div>
       </div>
 
-      {thin && (
-        <div className="fade flex items-center gap-2.5 rounded-[10px] border border-amber-border bg-amber-soft px-3.5 py-[9px] text-[13px] font-medium text-amber">
-          <Icon name="info" />
-          <span className="text-text">
-            Not enough people yet for a reliable answer: {fmt(e.people)} of ~{fmt(e.needed)} people needed ({e.progress}%).
-          </span>
-        </div>
-      )}
-
-      <VerdictCard e={e} />
       <TrafficLine e={e} />
       <div className="grid grid-cols-2 gap-4 max-[820px]:grid-cols-1">
         <VariantCard e={e} side="c" />

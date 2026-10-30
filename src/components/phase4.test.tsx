@@ -49,9 +49,9 @@ describe("Store card when the store is quiet", () => {
 });
 
 describe("Events page", () => {
-  it("lists the latest 40 events, and leaves the 'ago' to the browser so it can't differ from the server's", () => {
+  it("lists the latest 20 events, and leaves the 'ago' to the browser so it can't differ from the server's", () => {
     const m = html(<EventsTable events={makeEvents(Date.now())} meta={EVT_META} qv={QV} weekLabel="Oct 10 – 16" />);
-    expect(m.match(/<tr class="click"/g)).toHaveLength(40);
+    expect(m.match(/<tr class="click"/g)).toHaveLength(20);
     expect(m).not.toMatch(/\d+s ago/);
     expect(m).not.toMatch(BAD);
   });

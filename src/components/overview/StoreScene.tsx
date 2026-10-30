@@ -45,7 +45,6 @@ export function StoreScene({ zones, idle, minutes }: Pick<StoreLast30, "zones" |
       </div>
       <div className="mt-2.5 flex flex-wrap gap-4 text-xs text-text3">
         <span>Each stop counts what people did in the last {minutes} minutes.</span>
-        <span>Hover anyone to see what they were doing.</span>
       </div>
     </>
   );

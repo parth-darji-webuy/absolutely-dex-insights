@@ -23,8 +23,6 @@ const PRESETS: [PresetKey, string][] = [
   ["lastMonth", "Last month"],
 ];
 
-const code = "rounded-[5px] border border-border bg-card2 px-1.5 py-px text-[11px] text-text2";
-
 /** The Period card and the Experiment reports card. One period and one experiment choice for every download. */
 export function ReportsPanel({ experiments, today, trackingStart }: { experiments: ReportExperiment[]; /** Today in the store's time zone, YYYY-MM-DD. */ today: string; /** TRACKING_START, YYYY-MM-DD. */ trackingStart: string }) {
   const { toast } = useToast();
@@ -177,12 +175,7 @@ export function ReportsPanel({ experiments, today, trackingStart }: { experiment
                         <span className="grid size-[34px] flex-none place-items-center rounded-[10px] border border-border bg-card2 text-text2">
                           <Icon name="flask" />
                         </span>
-                        <span>
-                          <b className="font-[550]">{e.name} · daily results</b>
-                          <div className="text-xs text-text3">
-                            Flag <code className={code}>{e.flag}</code> · {e.metricShort} · from <code>experiment_tracking</code> + <code>{e.mtable}</code>
-                          </div>
-                        </span>
+                        <b className="font-[550]">{e.name}</b>
                       </span>
                     </td>
                     <td>
@@ -208,9 +201,6 @@ export function ReportsPanel({ experiments, today, trackingStart }: { experiment
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-text3">
-          Each file lists people, conversions and rate for control and treatment, one row per day. Dates are <code>YYYY-MM-DD</code> in your time zone.
-        </p>
       </Card>
     </>
   );

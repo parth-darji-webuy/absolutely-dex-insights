@@ -2,15 +2,12 @@ import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { CardError } from "./CardError";
 import { SkeletonStack, type SkeletonKind } from "./Skeleton";
-import { Source } from "./Source";
 
 export type CardProps = {
   title?: ReactNode;
   subtitle?: ReactNode;
   /** Buttons or chips shown at the top right. */
   actions?: ReactNode;
-  /** Tables (or other bits) that feed the card, shown as a Source line. */
-  source?: { tables: ReactNode[]; gap?: string };
   /** Shows grey placeholders shaped like `skeleton` instead of the content. */
   loading?: boolean;
   skeleton?: SkeletonKind;
@@ -28,7 +25,7 @@ export type CardProps = {
   children?: ReactNode;
 };
 
-export function Card({ title, subtitle, actions, source, loading, skeleton = "list", error, onRetry, delay = 0, flush, id, className, bodyClassName, children }: CardProps) {
+export function Card({ title, subtitle, actions, loading, skeleton = "list", error, onRetry, delay = 0, flush, id, className, bodyClassName, children }: CardProps) {
   const ready = !loading && !error;
   return (
     <section
@@ -47,7 +44,6 @@ export function Card({ title, subtitle, actions, source, loading, skeleton = "li
       )}
       <div className={cn(flush && ready ? "px-0 pt-3 pb-0" : "px-5 pt-4 pb-5", bodyClassName)}>
         {error ? <CardError message={error} onRetry={onRetry} /> : loading ? <SkeletonStack kind={skeleton} /> : children}
-        {ready && source && <Source {...source} />}
       </div>
     </section>
   );

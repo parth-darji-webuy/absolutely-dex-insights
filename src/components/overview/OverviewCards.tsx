@@ -8,7 +8,6 @@ import { experiments, overview, products as getProducts } from "@/lib/queries";
 import { sum } from "@/lib/rng";
 import type { EventType } from "@/types";
 import { ActivityChart } from "./ActivityChart";
-import { AllTables } from "./AllTables";
 import { StoreLast30Card } from "./StoreLast30Card";
 
 export async function StoreCard() {
@@ -23,7 +22,7 @@ export async function ActivityCard() {
   const last = o.days.at(-1)?.split(" ").pop();
   const range = o.days.length ? `${o.days[0]}${o.days.length > 1 && last ? ` – ${last}` : ""}` : "";
   return (
-    <Card title="Activity over time" subtitle={`Events per day, stacked by type${range ? ` · ${range}` : ""}`} source={{ tables: [<AllTables key="all" />] }} delay={100}>
+    <Card title="Activity over time" subtitle={`Events per day, stacked by type${range ? ` · ${range}` : ""}`} delay={100}>
       {o.days.length === 0 || keys.every((k) => sum(o.daily[k]) === 0) ? (
         <EmptyState title="No activity in these days" text={o.lastActivity ? `The store has recorded nothing in the last ${o.days.length || 7} days. The latest activity was ${ago(o.lastActivity)}.` : "Events will show up here as soon as people visit the store."} />
       ) : (
@@ -42,7 +41,6 @@ export async function TopProductsCard() {
     <Card
       title="Top products"
       subtitle="By add to cart this week"
-      source={{ tables: ["add_to_cart_tracking", '"Product"'] }}
       delay={150}
       actions={
         <Link href="/products" className="inline-flex items-center gap-1 text-[13px] font-medium text-accent-text hover:underline hover:underline-offset-[3px]">

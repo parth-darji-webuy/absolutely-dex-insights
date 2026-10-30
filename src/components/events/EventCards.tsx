@@ -1,5 +1,4 @@
 import { BarChart, Donut } from "@/components/charts";
-import { AllTables } from "@/components/overview/AllTables";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getEvents, getEventsPerMinute } from "@/lib/data";
@@ -12,7 +11,7 @@ export async function PerMinuteCard() {
   const d = await getEventsPerMinute();
   const total = sum(d.series.map((s) => sum(s.values)));
   return (
-    <Card title="Events per minute" subtitle={`Last 60 minutes · ${fmt(total)} events · stacked by type`} source={{ tables: [<AllTables key="all" />] }} delay={30}>
+    <Card title="Events per minute" subtitle={`Last 60 minutes · ${fmt(total)} events · stacked by type`} delay={30}>
       {total === 0 ? (
         <EmptyState title="No events in the last hour" text="Events will show up here as soon as people visit the store." />
       ) : (
@@ -38,7 +37,7 @@ export async function EventMixCard() {
   const segments = keys.map((k) => ({ label: o.eventMeta[k].short, value: sum(o.daily[k]), color: o.eventMeta[k].c }));
   const total = sum(segments.map((s) => s.value));
   return (
-    <Card title="Event mix" subtitle={`This week · ${fmt(total)} rows`} source={{ tables: [<AllTables key="all" />] }} delay={60}>
+    <Card title="Event mix" subtitle={`This week · ${fmt(total)} rows`} delay={60}>
       {total === 0 ? <EmptyState title="No events this week" /> : <div className="flex justify-center"><Donut segments={segments} size={140} stroke={20} center={fmt(total)} sub="rows" /></div>}
     </Card>
   );

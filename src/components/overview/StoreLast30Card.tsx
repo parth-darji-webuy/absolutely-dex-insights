@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ago, clock, fmt } from "@/lib/format";
 import type { Experiment, StoreLast30 } from "@/types";
-import { AllTables } from "./AllTables";
 import { KvGrid } from "./KvGrid";
 import { RunCard } from "./RunCard";
 import { StoreScene } from "./StoreScene";
@@ -20,7 +19,7 @@ const hm = (ms: number) => {
 };
 
 /**
- * The "Live activity · last N minutes" card (N = STORE_REFRESH_MINUTES). Refresh, and an automatic refresh every N
+ * The "Activity · last N minutes" card (N = STORE_REFRESH_MINUTES). Refresh, and an automatic refresh every N
  * minutes while the tab is visible, reload only this card. A failed refresh keeps the old numbers.
  */
 export function StoreLast30Card({ initial, experiments }: { initial: StoreLast30; experiments: Experiment[] }) {
@@ -76,13 +75,8 @@ export function StoreLast30Card({ initial, experiments }: { initial: StoreLast30
 
   return (
     <Card
-      title={`Live activity · last ${n} minutes`}
-      subtitle={
-        <>
-          <span suppressHydrationWarning>{`${hm(data.from)} – ${hm(data.to)}`}</span> · click a test to open it
-        </>
-      }
-      source={{ tables: [<AllTables key="all" />] }}
+      title={`Activity · last ${n} minutes`}
+      subtitle={<span suppressHydrationWarning>{`${hm(data.from)} – ${hm(data.to)}`}</span>}
       delay={80}
       actions={
         <>
@@ -129,9 +123,6 @@ export function StoreLast30Card({ initial, experiments }: { initial: StoreLast30
           ))}
         </div>
       )}
-      <p className="mt-3 text-xs text-text3">
-        Counts cover the {n} minutes before the last refresh. One visitor can be in several tests at once, so test counts don’t add up to visitors. Bars show people per minute.
-      </p>
     </Card>
   );
 }

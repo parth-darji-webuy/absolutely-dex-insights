@@ -38,7 +38,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
         <BrandMark variant="mark" className="brand-mark" priority />
       </div>
-      <div className="nav-h">Analytics</div>
       <Suspense fallback={<NavList pathname={null} />}>
         <ActiveNav />
       </Suspense>

@@ -8,12 +8,6 @@ import { products } from "@/lib/queries";
 import { sum } from "@/lib/rng";
 import type { CategoryCount, ColourCount } from "@/types";
 
-const code = (t: string) => (
-  <code key={t} className="rounded-[5px] border border-border bg-card2 px-1.5 py-px text-[11px] text-text2">
-    {t}
-  </code>
-);
-
 const ALL_COLS = [
   ["views", "Views"],
   ["qv", "Quick views"],
@@ -49,7 +43,6 @@ export async function HeatGridCard() {
           Cool <i /> Hot
         </span>
       }
-      source={{ tables: [code('"Product"'), code("quickview_tracking"), code("add_to_cart_tracking")] }}
     >
       {rows.length === 0 ? (
         <EmptyState title="No product activity this week" text="Products show up here once people open their quick view or add them to the cart." />
@@ -199,7 +192,7 @@ export async function FunnelCard() {
     ["Added to cart", "quick_view_cart_events", qv.add],
   ] as const;
   return (
-    <Card title="Quick view funnel" subtitle={FUNNEL_SUBTITLE} source={{ tables: [code("quickview_tracking"), code("quick_view_cart_events")] }} delay={80}>
+    <Card title="Quick view funnel" subtitle={FUNNEL_SUBTITLE} delay={80}>
       <FunnelBody steps={steps} emptyTitle="No quick view activity yet" emptyText="The funnel fills in as people open the quick view." />
     </Card>
   );
@@ -234,7 +227,7 @@ export async function CategoriesCard() {
   const { cats } = await products();
   const total = sum(cats.map(([, n]) => n));
   return (
-    <Card title="Popular categories" subtitle={`Share of ${fmt(total)} add-to-carts`} source={{ tables: [code("add_to_cart_tracking"), code('"Product"'), code('"Category"')] }} delay={140}>
+    <Card title="Popular categories" subtitle={`Share of ${fmt(total)} add-to-carts`} delay={140}>
       <Bars items={cats} total={total} />
     </Card>
   );
@@ -244,7 +237,7 @@ export async function ColoursCard() {
   const { colours } = await products();
   const total = sum((await products()).cats.map(([, n]) => n));
   return (
-    <Card title="Popular colours" subtitle={`Share of ${fmt(total)} add-to-carts`} source={{ tables: [code('add_to_cart_tracking."selectedColor"')] }} delay={140}>
+    <Card title="Popular colours" subtitle={`Share of ${fmt(total)} add-to-carts`} delay={140}>
       <Bars items={colours} swatch total={total} />
     </Card>
   );

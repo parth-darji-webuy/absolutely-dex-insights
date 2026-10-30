@@ -33,7 +33,7 @@ export default function Page() {
         </CardSlot>
       </div>
 
-      <CardSlot title={`Live activity · last ${getEnv().STORE_REFRESH_MINUTES} minutes`} delay={80}>
+      <CardSlot title={`Activity · last ${getEnv().STORE_REFRESH_MINUTES} minutes`} delay={80}>
         <StoreCard />
       </CardSlot>
 

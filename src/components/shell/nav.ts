@@ -12,10 +12,6 @@ export const PAGES: NavPage[] = [
 
 /** The line under each page's heading. */
 export const SUBS: Record<string, string> = {
-  overview: "How the shop is doing this week, in plain words.",
-  experiments: "Tests running in GrowthBook, explained simply.",
-  events: "Every tracked event, newest first.",
-  products: "What people look at, open and add to cart.",
   reports: "Daily results for every experiment. Pick the dates and the experiment, then download a CSV.",
 };
 

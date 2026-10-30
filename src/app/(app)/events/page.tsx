@@ -21,7 +21,6 @@ export default function Page() {
       <CardSlot fallback={<Card loading skeleton="table" delay={60} />}>
         <LatestEventsCard />
       </CardSlot>
-      <p className="fade text-xs text-text3">Click a row to see the full payload and the visitor’s journey.</p>
     </>
   );
 }

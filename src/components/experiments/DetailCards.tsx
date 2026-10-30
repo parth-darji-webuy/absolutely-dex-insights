@@ -39,7 +39,7 @@ export function RaceCard({ e }: { e: Experiment }) {
   const subtitle = `Each runner goes as far as their ${e.metricShort} · ${fmt(e.people)} of ~${fmt(e.needed)} people in`;
   return (
     <Guard title={title} subtitle={subtitle}>
-      <Card title={title} subtitle={subtitle} source={{ tables: ["experiment_tracking", e.mtable].filter(Boolean) }} delay={100}>
+      <Card title={title} subtitle={subtitle} delay={100}>
         <Race e={e} />
       </Card>
     </Guard>
@@ -53,7 +53,7 @@ export function ConversionCard({ e }: { e: Experiment }) {
   const colour = treatmentColour(e);
   return (
     <Guard title={title} subtitle={subtitle}>
-      <Card title={title} subtitle={subtitle} source={{ tables: ["experiment_tracking", e.mtable].filter(Boolean) }} delay={120} actions={<Legend e={e} />}>
+      <Card title={title} subtitle={subtitle} delay={120} actions={<Legend e={e} />}>
         {all.length === 0 ? (
           <EmptyState title="Nothing to chart yet" text="The line will start once people have entered the test." />
         ) : (
@@ -81,7 +81,7 @@ export function LiftCard({ e }: { e: Experiment }) {
   const subtitle = "Likely range of the true lift · indicative";
   return (
     <Guard title={title} subtitle={subtitle}>
-      <Card title={title} subtitle={subtitle} source={{ tables: ["GrowthBook results API"] }} delay={140}>
+      <Card title={title} subtitle={subtitle} delay={140}>
         {e.rc > 0 ? <LiftRange lift={e.lift} range={e.liftCi} lead={e.lead} /> : <EmptyState title="No lift to show yet" text="The control group hasn’t converted yet, so there is nothing to compare with." />}
       </Card>
     </Guard>
@@ -94,7 +94,7 @@ export function PeoplePerDayCard({ e }: { e: Experiment }) {
   const dp = dailyPeople(e);
   return (
     <Guard title={title} subtitle={subtitle}>
-      <Card title={title} subtitle={subtitle} source={{ tables: ["experiment_tracking"] }} delay={160} actions={<Legend e={e} />}>
+      <Card title={title} subtitle={subtitle} delay={160} actions={<Legend e={e} />}>
         {dp.c.length === 0 ? (
           <EmptyState title="No people yet" text="Daily counts will show up once people enter the test." />
         ) : (

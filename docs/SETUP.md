@@ -50,10 +50,10 @@ npm install
 
 The app reads the store through a login that can only `SELECT`. Make it in the **Neon SQL Editor**, signed in as the owner (`neondb_owner`):
 
-1. Open [`docs/sql/01-create-read-only-role.sql`](sql/01-create-read-only-role.sql).
-2. Replace the password placeholder (make one with `openssl rand -hex 24`) and, if your database isn't called `neondb`, the database name.
-3. Paste it into the SQL Editor and run it.
-4. Run [`docs/sql/02-check-the-role.sql`](sql/02-check-the-role.sql). Every value except `can_select` must say `false`.
+1. Open [`docs/sql/setup.sql`](sql/setup.sql).
+2. In PART 1, replace the password placeholder (make one with `openssl rand -hex 24`) and, if your database isn't called `neondb`, the database name.
+3. Paste the whole file into the SQL Editor and run it.
+4. Look at the result of PART 2. Every value except `can_select` must say `false`.
 
 > Do not create this login by clicking "New role" in the Neon console. That kind of role can write.
 
@@ -123,11 +123,7 @@ Both listen on `localhost` only. Open the address, and sign in as:
 - Open an event row on **Events**; a drawer shows the visitor's journey and the stored row.
 - On **Reports**, pick a period and download a CSV; open it in Excel (the £ signs and dates should look right).
 - With `AI_PROVIDER=groq`, ask on **Ask**: "Which product had the most add-to-carts yesterday?" and compare the SQL shown.
-- Empty or all zeros? Run [`docs/sql/04-is-there-data.sql`](sql/04-is-there-data.sql). If the latest row is older than 7 days, the 7-day Overview is correctly empty.
-
-### 10. (Optional) Fake data for a demo
-
-Never on the live store. Create a Neon **branch**, run [`docs/demo-data.sql`](demo-data.sql) in the branch's SQL Editor as the owner, and point the two `STORE_DATABASE_URL…` values at the branch. To go back, restore the live URLs. [`docs/demo-data-remove.sql`](demo-data-remove.sql) deletes only the fake visitors (ids starting `demo_`).
+- Empty or all zeros? In the Neon SQL Editor run `SELECT MAX("createdAt") FROM add_to_cart_tracking;` If the newest row is older than 7 days, the 7-day Overview is correctly empty.
 
 ## Why `db:generate`?
 
@@ -143,7 +139,7 @@ Never on the live store. Create a Neon **branch**, run [`docs/demo-data.sql`](de
 | Sign-in says "That email and password don't match" | wrong password, or `ADMIN_PASSWORD` changed without a restart | restart the app; use the email above |
 | `/ask` says "switched off" | `AI_PROVIDER=none` | set `groq`, save, restart |
 | "The AI is busy, try again in a minute" | Groq is rate-limiting or down | wait a minute |
-| Every page is empty / zeros | no events in the last 7 days | run `docs/sql/04-is-there-data.sql` |
+| Every page is empty / zeros | no events in the last 7 days | in the Neon SQL Editor run `SELECT MAX("createdAt") FROM add_to_cart_tracking;` |
 | A page takes 2 to 4 seconds | the Neon project is far from you | normal; moving the Neon project nearer helps |
 | "Another next dev server is already running" | a copy is already open | use it, or stop it (`Ctrl+C`) |
 

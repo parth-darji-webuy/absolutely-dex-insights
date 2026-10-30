@@ -13,18 +13,40 @@ A dashboard for the store's A/B tests, events and products. It runs only on this
 
 | Read this | When |
 | --- | --- |
-| [docs/SIMPLE.md](docs/SIMPLE.md) | You want it explained in the simplest possible words first |
 | [docs/SETUP.md](docs/SETUP.md) | You just pulled the project and want it running (about 20 minutes) |
 | [docs/PROJECT.md](docs/PROJECT.md) | You want the whole picture: how it was built, what each page does, how the numbers are worked out, security, every `.env` value, troubleshooting |
-| [docs/sql/](docs/sql/) | The SQL to run: create the read-only login, check it, check the numbers, find out why a page is empty |
-| [docs/demo-data.sql](docs/demo-data.sql) | Fake visitors for a demo (on a test branch only) |
+| [docs/sql/setup.sql](docs/sql/setup.sql) | The one SQL file for setup: create the read-only login and check it |
 
-## First time
+## Run it from a clone (about 20 minutes)
 
-1. Use Node 22.12 or newer (`nvm use` reads `.nvmrc`).
-2. `npm install`
-3. Copy `.env.example` to `.env` and fill in every value (the file explains each one). `.env` is never committed, and nothing in it is ever shown in the browser or the logs. A missing or bad value stops the app with one line naming the variable.
-4. `npm run db:generate` (it also runs as part of `npm run build`).
+**You need first:** Node 22.12 or newer, Git, a Neon database that has the store's tables (with the read-only login from [docs/sql/setup.sql](docs/sql/setup.sql)), and a GrowthBook client key (`sdk-…`). A Groq key is optional: set `AI_PROVIDER=none` to run without it.
+
+1. **Get the code**
+   ```bash
+   git clone https://github.com/parth-darji-webuy/absolutely-dex-insights.git
+   cd absolutely-dex-insights
+   ```
+2. **Use the right Node, then install**
+   ```bash
+   nvm use
+   npm install
+   ```
+3. **Create your settings file**
+   ```bash
+   cp .env.example .env
+   ```
+   Open `.env` and fill in every value (the file explains each one). Never commit it or send it to anyone: it holds your passwords. A missing or bad value stops the app with one line naming the variable.
+4. **Build the database client**
+   ```bash
+   npm run db:generate
+   ```
+5. **Start it**
+   ```bash
+   npm run dev
+   ```
+   Open http://localhost:3000 and sign in as `designerexchange9@gmail.com` with the `ADMIN_PASSWORD` you put in `.env`.
+
+Stuck? [docs/SETUP.md](docs/SETUP.md) has the same steps in more detail, with how to get the connection strings and a table of common errors. If the pages are empty, run `SELECT MAX("createdAt") FROM add_to_cart_tracking;` in the Neon SQL Editor: if the newest row is older than 7 days, the 7-day Overview is correctly empty.
 
 ## Start and stop
 
@@ -93,4 +115,3 @@ So the question text and the query results leave this computer and go to Groq. T
 - `docs/prototype.html` is the approved design.
 - `src/lib/data.ts` is the only place pages get data from; the queries are in `src/lib/store/`.
 - `src/app/api/` holds the four routes: `store/last-30`, `events/detail`, `reports/experiment` and `ask`. Each one checks you are signed in.
-- `docs/demo-data.sql` fills a **test** database (never the live store) with fake visitors. `docs/demo-data-remove.sql` removes them again.

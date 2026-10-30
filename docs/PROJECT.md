@@ -307,7 +307,7 @@ Set `AI_PROVIDER=none` and restart. Ask disappears from ⌘K and the header sear
 
 | Layer | What it does |
 | --- | --- |
-| **Read-only database login** | `insights_reader_ro` can `SELECT` from 8 tables and do nothing else. It cannot read customer accounts (`"User"`). Created by [`01-create-read-only-role.sql`](sql/01-create-read-only-role.sql) and verified by [`02-check-the-role.sql`](sql/02-check-the-role.sql). |
+| **Read-only database login** | `insights_reader_ro` can `SELECT` from 8 tables and do nothing else. It cannot read customer accounts (`"User"`). Created and verified by [`setup.sql`](sql/setup.sql). |
 | **Read-only transaction + timeout** | Every query starts with `transaction_read_only = on` and `statement_timeout = 15s`. Even if the login were ever widened, a write fails with `cannot execute DELETE in a read-only transaction`. |
 | **Fixed table list** | Table names in SQL come from the code, never from user input. The one exception, Ask, runs only after `checkSql` has proven the query uses the eight allowed tables. |
 | **Sign-in** | The password is compared with SHA-256 and `timingSafeEqual`. The session is a JWT (HS256, signed with `SESSION_SECRET`) in an `httpOnly`, `SameSite=Lax` cookie named `dex_session`, valid 12 hours. |
@@ -346,7 +346,7 @@ The step-by-step guide is [SETUP.md](SETUP.md). In one screen:
 ```bash
 git clone <repository url> absolutely-dex-insights && cd absolutely-dex-insights
 nvm use && npm install
-# in the Neon SQL Editor, as the owner: run docs/sql/01-create-read-only-role.sql, then 02
+# in the Neon SQL Editor, as the owner: run docs/sql/setup.sql
 cp .env.example .env          # fill in every line (section 9)
 npm run db:generate           # builds src/generated (not in Git)
 npm run dev                   # or: npm run build && npm run start
@@ -358,14 +358,9 @@ After every later `git pull`: `npm install` then `npm run db:generate`.
 
 | File | Run it… | As | What it does |
 | --- | --- | --- | --- |
-| [`docs/sql/01-create-read-only-role.sql`](sql/01-create-read-only-role.sql) | once, at setup | Neon owner | Creates `insights_reader_ro` with `SELECT` on the 8 tables. |
-| [`docs/sql/02-check-the-role.sql`](sql/02-check-the-role.sql) | after 01 | Neon owner | Proves the login can't write and can't read `"User"`. |
-| [`docs/sql/03-check-the-numbers.sql`](sql/03-check-the-numbers.sql) | whenever you doubt a number | the read-only login is enough | Six queries that reproduce what Experiments, Overview, Products and Events show. Replace `Asia/Kolkata` with your time zone. |
-| [`docs/sql/04-is-there-data.sql`](sql/04-is-there-data.sql) | when a page looks empty | the read-only login | Row counts, first and last row per table, and how many rows are fake (`demo_`). |
-| [`docs/demo-data.sql`](demo-data.sql) | to get a full-looking demo | Neon owner, **on a branch, never the live store** | About 1,200 fake visitors (ids start `demo_`) across 10 days, with realistic add-to-cart, quick-view, What's New and theme events. Safe to run again. |
-| [`docs/demo-data-remove.sql`](demo-data-remove.sql) | to clean up | Neon owner | Deletes only `demo_` visitors. |
+| [`docs/sql/setup.sql`](sql/setup.sql) | once, at setup | Neon owner | PART 1 creates `insights_reader_ro` with `SELECT` on the 8 tables. PART 2 proves the login can't write and can't read `"User"`. |
 
-The scripts in `docs/sql` were run and checked on a local Postgres (role creation, the permission checks, and all six number-check queries) before being written here.
+The setup script was run and checked on a local Postgres (role creation and the permission checks) before being written here.
 
 ### The tables the app reads
 
@@ -397,7 +392,6 @@ Other tables exist in the database (customer accounts, reviews, wishlists, two o
 | **Change how often the Store card refreshes** | `STORE_REFRESH_MINUTES` (5 to 120), restart. |
 | **Get a test's results as a spreadsheet** | Reports → pick period → Download CSV. |
 | **Update to new code** | `git pull`, `npm install`, `npm run db:generate`, restart. |
-| **Use demo data** | Section 11, on a Neon branch only. |
 
 ## 13. Tests and quality checks
 
@@ -429,7 +423,7 @@ What the tests cover: the statistics and verdict wording; the day and time-zone 
 | `/ask` says "switched off", or Ask is missing from ⌘K | `AI_PROVIDER=none` | Set `groq`, restart. |
 | "The AI is busy, try again in a minute" | Groq is rate-limiting, slow, or the key/model is wrong | Wait; check `GROQ_API_KEY` and `GROQ_MODEL`. |
 | "I can only answer questions about the tracked data" | The question was refused by design (or the AI refused) | Ask about events, products or tests; see the suggestion chips. |
-| Overview is all zeros | No events in the last 7 days in the database the app points at | Run `docs/sql/04-is-there-data.sql`. If the latest row is old, this is correct. On a demo branch, re-run `docs/demo-data.sql` to refresh the dates. |
+| Overview is all zeros | No events in the last 7 days in the database the app points at | In the Neon SQL Editor run `SELECT MAX("createdAt") FROM add_to_cart_tracking;` If the newest row is old, this is correct. |
 | "Store · last 30 minutes" is 0 | Nobody was in the store in that window | Correct; it says when the latest activity was. |
 | A test shows 0 people and "1 day running" | GrowthBook runs it but no visitor has been recorded yet | Correct. |
 | "Interest vs conversion" says "Not tracked yet" | The store doesn't record product views | See section 15. |
@@ -464,8 +458,7 @@ What the tests cover: the statistics and verdict wording; the day and time-zone 
 docs/
   PROJECT.md, SETUP.md            these documents
   prototype.html                  the approved design
-  sql/                            roles, checks, number-checks (section 11)
-  demo-data.sql, demo-data-remove.sql
+  sql/setup.sql                   the database login setup (section 11)
 prisma/schema.prisma              the database layout (from db:pull)
 prisma.config.ts                  Prisma settings (reads .env)
 src/

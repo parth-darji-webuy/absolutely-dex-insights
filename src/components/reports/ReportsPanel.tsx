@@ -75,11 +75,11 @@ export function ReportsPanel({ experiments, today, trackingStart }: { experiment
       if (res.status === 401) return router.push("/sign-in");
       if (!res.ok) {
         const { error } = (await res.json().catch(() => ({}))) as { error?: string };
-        toast(res.status === 404 ? `${e.name} · daily results: ${(error ?? "nothing in this period").replace(/^Not/, "not")}` : (error ?? "The download didn’t work. Try again."), res.status === 404 ? "info" : "warn");
+        toast(res.status === 404 ? `${e.name}: ${(error ?? "nothing in this period").replace(/^Not/, "not")}` : (error ?? "The download didn’t work. Try again."), res.status === 404 ? "info" : "warn");
         return;
       }
-      const name = decodeURIComponent(res.headers.get("X-Report-Name") ?? `${e.name} · daily results`);
-      const file = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? `absolutelydex_${e.key}-daily_${ymd(from)}_to_${ymd(to)}.csv`;
+      const name = decodeURIComponent(res.headers.get("X-Report-Name") ?? `${e.name}`);
+      const file = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? `absolutelydex_${e.key}_${ymd(from)}_to_${ymd(to)}.csv`;
       downloadBlob(file, await res.blob());
       toast(`${name}: ${fmt(Number(res.headers.get("X-Report-Rows") ?? 0))} rows downloaded`);
     } catch {

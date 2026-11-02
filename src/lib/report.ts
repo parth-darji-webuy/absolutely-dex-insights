@@ -12,7 +12,7 @@ export const safeFilePart = (s: string): string => s.replace(/[^A-Za-z0-9._-]+/g
 
 /** The details shown above the table, the column headers, the rows and the file name of one experiment's CSV. */
 export function buildReport(exp: ReportMeta, rows: ReportRow[], from: Date, to: Date, generatedBy: string, tz: string, now: Date = new Date()): Report {
-  const name = `${exp.name} · daily results`;
+  const name = `${exp.name}`;
   const n = Math.max(0, daysBetween(from, to));
   const meta = [
     ["Report", name],
@@ -28,7 +28,7 @@ export function buildReport(exp: ReportMeta, rows: ReportRow[], from: Date, to: 
     meta,
     head: REPORT_HEAD,
     rows: rows.map((r) => [r.date, r.weekday, r.experiment, r.flag, r.variant, r.label, r.people, r.converted, r.ratePct, r.metric]),
-    file: `absolutelydex_${safeFilePart(exp.key)}-daily_${ymd(from)}_to_${ymd(to)}.csv`,
+    file: `absolutelydex_${safeFilePart(exp.key)}_${ymd(from)}_to_${ymd(to)}.csv`,
   };
 }
 

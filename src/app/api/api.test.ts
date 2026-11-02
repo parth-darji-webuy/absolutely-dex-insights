@@ -128,13 +128,13 @@ describe("GET /api/reports/experiment", () => {
     const res = await reportGET(req(ok));
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toBe("text/csv; charset=utf-8");
-    expect(res.headers.get("Content-Disposition")).toBe('attachment; filename="absolutelydex_quick-view-ab-test-daily_2026-10-20_to_2026-10-22.csv"');
+    expect(res.headers.get("Content-Disposition")).toBe('attachment; filename="absolutelydex_quick-view-ab-test_2026-10-20_to_2026-10-22.csv"');
     expect(res.headers.get("X-Report-Rows")).toBe("1");
     const bytes = new Uint8Array(await res.arrayBuffer());
     expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
     const text = new TextDecoder().decode(bytes);
     const lines = text.replace(/^﻿/, "").split("\r\n");
-    expect(lines[0]).toBe('"Report","Quick View · daily results"');
+    expect(lines[0]).toBe('"Report","Quick View"');
     expect(lines.some((l) => l === "")).toBe(true);
     expect(lines.at(-1)).toBe('"2026-10-21","Wed","\'=Evil","f","control","Add, to ""Cart""","3","1","33.33","added to cart"');
     expect(text).not.toMatch(/[^\r]\n/);

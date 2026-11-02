@@ -9,20 +9,20 @@ const NOW = new Date("2026-10-28T09:05:03Z");
 
 describe("buildReport", () => {
   it("names the file after the experiment and the period, always with from and to", () => {
-    expect(buildReport({ key: "add-to-cart", name: "Add to Cart" }, [row], FROM, TO, "x", "UTC", NOW).file).toBe("absolutelydex_add-to-cart-daily_2026-10-07_to_2026-10-07.csv");
-    expect(buildReport({ key: "add-to-cart", name: "Add to Cart" }, [row], FROM, new Date(2026, 9, 9), "x", "UTC", NOW).file).toBe("absolutelydex_add-to-cart-daily_2026-10-07_to_2026-10-09.csv");
+    expect(buildReport({ key: "add-to-cart", name: "Add to Cart" }, [row], FROM, TO, "x", "UTC", NOW).file).toBe("absolutelydex_add-to-cart_2026-10-07_to_2026-10-07.csv");
+    expect(buildReport({ key: "add-to-cart", name: "Add to Cart" }, [row], FROM, new Date(2026, 9, 9), "x", "UTC", NOW).file).toBe("absolutelydex_add-to-cart_2026-10-07_to_2026-10-09.csv");
   });
 
   it("keeps odd characters out of the file name", () => {
     expect(safeFilePart('a/b"c d\r\n')).toBe("a-b-c-d");
     expect(safeFilePart("")).toBe("experiment");
-    expect(buildReport({ key: '../x"y', name: "A" }, [], FROM, TO, "x", "UTC", NOW).file).toMatch(/^absolutelydex_[A-Za-z0-9._-]+-daily_2026-10-07_to_2026-10-07\.csv$/);
+    expect(buildReport({ key: '../x"y', name: "A" }, [], FROM, TO, "x", "UTC", NOW).file).toMatch(/^absolutelydex_[A-Za-z0-9._-]+_2026-10-07_to_2026-10-07\.csv$/);
   });
 
   it("writes the details on the store's clock and time zone", () => {
     const r = buildReport({ key: "k", name: "Add to Cart" }, [row, row], FROM, new Date(2026, 9, 9), "Designer Exchange (Admin)", "Asia/Kolkata", NOW);
     const d = Object.fromEntries(r.meta);
-    expect(d.Report).toBe("Add to Cart · daily results");
+    expect(d.Report).toBe("Add to Cart");
     expect(d.Period).toBe("07 Oct 2026 – 09 Oct 2026 (3 days)");
     expect(d.Generated).toBe("28 Oct 2026, 14:35:03");
     expect(d["Time zone"]).toBe("Asia/Kolkata (UTC+05:30)");
@@ -68,7 +68,7 @@ describe("reportCsv", () => {
     const r = buildReport({ key: "k", name: "A" }, [row], FROM, TO, "x", "UTC", NOW);
     const lines = reportCsv(r).split("\r\n");
     expect(lines).toHaveLength(7 + 1 + 1 + 1);
-    expect(lines[0]).toBe('﻿"Report","A · daily results"');
+    expect(lines[0]).toBe('﻿"Report","A"');
     expect(lines[7]).toBe("");
     expect(lines[8]).toBe('"date","weekday","experiment","flag","variant","label","people","converted","rate_pct","metric"');
     expect(lines[9]).toBe('"2026-10-07","Wed","Add to Cart button text","add-to-cart-btn","control","Add to Cart","120","12","10.00","added to cart"');

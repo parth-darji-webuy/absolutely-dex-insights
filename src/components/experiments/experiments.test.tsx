@@ -60,7 +60,7 @@ describe("Experiment page pieces", () => {
   });
 
   it("warns about the traffic split on add-to-cart only", () => {
-    const flagged = EXPS.filter((e) => html(<TrafficLine e={e} />).includes("Uneven, check tracking")).map((e) => e.key);
+    const flagged = EXPS.filter((e) => html(<TrafficLine e={e} />).includes("Check events")).map((e) => e.key);
     expect(flagged).toEqual(["add-to-cart"]);
     expect(html(<TrafficLine e={EXPS[0]} />)).toContain("Traffic split 58 / 42");
   });

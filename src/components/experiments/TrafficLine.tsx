@@ -53,7 +53,6 @@ export function TrafficLine({ e }: { e: Experiment }) {
       )}
       {off ? (
         <>
-          <span className="font-[550] whitespace-nowrap text-amber max-[820px]:order-4">Uneven, check tracking</span>
           <Link href="/events" className="inline-flex items-center gap-1 text-[13px] font-medium whitespace-nowrap text-amber hover:underline hover:underline-offset-[3px] max-[820px]:order-4">
             Check events <Icon name="chevR" size="sm" />
           </Link>

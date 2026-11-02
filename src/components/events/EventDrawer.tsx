@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
-import { useToast } from "@/components/ui/Toast";
 import { journeyText, VARIANT_SOURCE } from "@/lib/events";
 import { clock } from "@/lib/format";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -25,13 +24,7 @@ const Code = ({ children }: { children: React.ReactNode }) => <code>{children}</
 /** Why the page can say which variant a row belongs to. */
 function VariantNotice({ type }: { type: EventType }) {
   const v = VARIANT_SOURCE[type];
-  if (v === "yes")
-    return (
-      <div className="notice">
-        <Icon name="check" />
-        <span>This row is the exposure itself, written by GrowthBook&apos;s trackingCallback.</span>
-      </div>
-    );
+  if (v === "yes" || v === "no") return null;
   return (
     <div className="notice">
       <Icon name="info" />
@@ -45,55 +38,11 @@ function VariantNotice({ type }: { type: EventType }) {
           <Code>whats_new_tracking</Code> stores its own copy of the variant. Insights still takes the variant from <Code>experiment_tracking</Code>, so both pages always agree.
         </span>
       )}
-      {v === "no" && (
-        <span>
-          This table has no variant column. Insights links the row to experiments by matching <Code>anonymousId</Code> with <Code>experiment_tracking</Code>.
-        </span>
-      )}
     </div>
   );
 }
 
-function Json({ row }: { row: Record<string, unknown> }) {
-  const entries = Object.entries(row);
-  return (
-    <pre className="json">
-      {"{\n"}
-      {entries.map(([k, v], i) => (
-        <span key={k}>
-          {"  "}
-          <span className="k">&quot;{k}&quot;</span>:{" "}
-          {v === null || v === undefined ? <span className="text-text3">null</span> : typeof v === "string" ? <span className="s">&quot;{v}&quot;</span> : <span className="n">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>}
-          {i < entries.length - 1 ? ",\n" : "\n"}
-        </span>
-      ))}
-      {"}"}
-    </pre>
-  );
-}
-
 type Loaded = { key: string; state: "ready"; data: EventDetail } | { key: string; state: "missing" | "error" };
-
-async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Older browsers or a blocked clipboard: fall back to a hidden text box.
-    try {
-      const t = document.createElement("textarea");
-      t.value = text;
-      t.style.cssText = "position:fixed;opacity:0";
-      document.body.appendChild(t);
-      t.select();
-      const ok = document.execCommand("copy");
-      t.remove();
-      return ok;
-    } catch {
-      return false;
-    }
-  }
-}
 
 function Problem({ missing, onRetry }: { missing: boolean; onRetry: () => void }) {
   return (
@@ -111,7 +60,6 @@ function Problem({ missing, onRetry }: { missing: boolean; onRetry: () => void }
 const H4 = ({ children }: { children: React.ReactNode }) => <h4 className="mb-2.5 text-xs font-semibold tracking-[.06em] text-text3 uppercase">{children}</h4>;
 
 export function EventDrawer({ event: e, meta, open, onClose, onSeeQuickView }: Props) {
-  const { toast } = useToast();
   const router = useRouter();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -134,13 +82,6 @@ export function EventDrawer({ event: e, meta, open, onClose, onSeeQuickView }: P
 
   const current = loaded?.key === key ? loaded : null;
   const detail = current?.state === "ready" ? current.data : null;
-
-  const copy = async () => {
-    if (!detail) return;
-    const ok = await copyText(JSON.stringify(detail.row, null, 2));
-    if (ok) toast("Payload copied as JSON");
-    else toast("Couldn’t copy. Select the text and copy it by hand.", "warn");
-  };
 
   return (
     <Drawer
@@ -198,15 +139,6 @@ export function EventDrawer({ event: e, meta, open, onClose, onSeeQuickView }: P
             </div>
           )}
           <VariantNotice type={e.event} />
-          <div>
-            <H4>Row as stored</H4>
-            {detail ? <Json row={detail.row} /> : current ? null : <Skeleton w="100%" h={120} />}
-          </div>
-          <div>
-            <Button onClick={copy} disabled={!detail}>
-              <Icon name="copy" /> Copy JSON
-            </Button>
-          </div>
         </>
       )}
     </Drawer>

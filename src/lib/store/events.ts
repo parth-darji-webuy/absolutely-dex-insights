@@ -103,8 +103,8 @@ export const JOURNEY_DAYS = 7;
 export const JOURNEY_MAX = 100;
 
 /**
- * One event row in full: the row as stored, and the visitor's journey, which is their events within 7 days
- * of this one (at most 100 steps, the newest, with a count of the earlier ones). Null when there is no such row.
+ * One event row in full: the row as stored, and the visitor's journey, which is their events from 7 days
+ * before this one up to their latest (at most 100 steps, the newest, with a count of the earlier ones). Null when there is no such row.
  * `table` must already be one of the six tracking tables (see parseDetailQuery).
  */
 export async function loadEventDetail(table: TrackingTable, id: string): Promise<EventDetail | null> {
@@ -112,7 +112,7 @@ export async function loadEventDetail(table: TrackingTable, id: string): Promise
     const found = (await queryEvents(tx, { aid: null, id, ...FOREVER, limit: 5 })).find((e) => e.table === table);
     if (!found) return null;
     const span = JOURNEY_DAYS * 86_400_000;
-    const window = { aid: found.visitor, id: null, from: new Date(found.ts - span), to: new Date(found.ts + span) };
+    const window = { aid: found.visitor, id: null, from: new Date(found.ts - span), to: FOREVER.to };
     const all = numbered(await queryEvents(tx, { ...window, limit: JOURNEY_MAX + 1 }), false);
     const [counted] = await tx.$queryRaw<{ n: bigint }[]>`
       SELECT SUM(n) AS n FROM (

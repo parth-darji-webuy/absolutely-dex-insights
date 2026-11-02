@@ -8,7 +8,7 @@ import { QuickViewReplica } from "@/components/site/QuickViewReplica";
 import { EVENT_META as EVT_META } from "@/lib/event-meta";
 import { makeEvents, QV } from "@/test/fixtures";
 import type { Answer } from "@/types";
-import { CategoriesCard, ColoursCard, FunnelCard, HeatGridCard } from "./products/ProductCards";
+import { CategoriesCard, ColoursCard, HeatGridCard } from "./products/ProductCards";
 import { EventMixCard, PerMinuteCard } from "./events/EventCards";
 
 // The cards read through @/lib/data; here it hands out fixed test data so the markup can be checked.
@@ -72,13 +72,12 @@ describe("Events page", () => {
 
 describe("Products page", () => {
   it("renders every card with the prototype's wording and no NaN", async () => {
-    const cards = await Promise.all([HeatGridCard(), FunnelCard(), CategoriesCard(), ColoursCard()]);
+    const cards = await Promise.all([HeatGridCard(), CategoriesCard(), ColoursCard()]);
     const m = cards.map((c) => html(c)).join("");
     expect(m).not.toMatch(BAD);
     expect(m).toContain("Viewed a lot, rarely added to cart");
     expect(m).toContain("<b>Linea Relaxed Linen Overshirt</b></span><span> and <b>the Aperture R4 camera</b>");
     expect(m).toContain("3,120 and 2,860) but only 6.9% and 6.2% of viewers add them to cart, vs 9.9% across all five.");
-    expect(m).toContain("biggest drop-off");
     expect(m).toContain("Share of 1,416 add-to-carts");
   });
 
@@ -91,12 +90,11 @@ describe("Products page", () => {
   it("with views and extra clicks untracked, the pages show only what is tracked instead of zeros", async () => {
     const untracked = { products: [], cats: [], colours: [], qv: { ...ZERO, opened: 20, add: 5, extrasTracked: false }, viewsTracked: false };
     state.products = untracked;
-    const m = (await Promise.all([HeatGridCard(), FunnelCard()])).map((c) => html(c)).join("");
+    const m = html(await HeatGridCard());
     state.products = null;
     expect(m).not.toMatch(BAD);
     expect(m).toContain("No product activity this week");
     expect(m).not.toContain("Saw quick view button");
-    expect(m).toContain("25.0% continued");
     const modal = html(<QuickViewReplica qv={untracked.qv} heat />);
     expect(modal).not.toMatch(BAD);
     expect(modal.match(/class="hot/g)).toHaveLength(1); // only Add to Cart is tracked

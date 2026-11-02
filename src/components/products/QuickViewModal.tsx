@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { QuickViewReplica } from "@/components/site/QuickViewReplica";
@@ -29,10 +28,6 @@ export function QuickViewModal({ open, onClose, qv, weekLabel }: Props) {
             Show click data
           </button>
           <span className="text-xs text-text3">Hover a number for the exact counts</span>
-          <div className="grow" />
-          <Link href="/products" className="link" onClick={onClose}>
-            See the funnel <Icon name="chevR" size="sm" />
-          </Link>
         </div>
         <QuickViewReplica qv={qv} heat={heat} />
         <div className="qv-outcomes">

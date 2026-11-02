@@ -593,18 +593,6 @@ pre.json .k{color:var(--text)} pre.json .s{color:var(--accent-text)} pre.json .n
 .heat-legend i{width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,hsl(215 70% 55% / .12),hsl(260 70% 60% / .4),hsl(305 70% 60% / .7))}
 .insight{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:10px;background:var(--card2);border:1px solid var(--border);font-size:13.5px;margin-top:16px}
 .insight .ic{margin-top:3px;color:var(--text2)}
-.funnel{display:flex;flex-direction:column;gap:6px}
-.fstep{display:grid;grid-template-columns:170px minmax(0,1fr) 110px;gap:16px;align-items:center}
-.fstep .fl b{display:block;font-weight:550}
-.fstep .fl span{font-size:12px;color:var(--text3)}
-.fbar{height:36px;border-radius:8px;background:var(--card2);overflow:hidden;border:1px solid var(--border)}
-.fbar i{display:block;height:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--c1) 55%,transparent),color-mix(in srgb,var(--c1) 30%,transparent));transform-origin:left;animation:grow 1s var(--ease) both}
-.fstep .fv{text-align:right;font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
-.fstep .fv span{display:block;font-size:12px;color:var(--text3);font-weight:500}
-.fdrop{display:grid;grid-template-columns:170px minmax(0,1fr) 110px;gap:16px;font-size:12px;color:var(--text3);padding:2px 0}
-.fdrop div{display:flex;align-items:center;gap:8px}
-.fdrop.big div{color:var(--amber);font-weight:550}
-.fdrop .arrow{width:1px;height:14px;background:var(--border2);margin-left:12px}
 .ask-hero{padding:28px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(700px 220px at 50% 0%,var(--accent-soft),transparent 70%),var(--card)}
 .ask-input{display:flex;align-items:center;gap:10px;height:48px;padding:0 8px 0 16px;border:1px solid var(--border2);border-radius:12px;background:var(--card);color:var(--text3)}
 .ask-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
@@ -678,14 +666,6 @@ table.mini tr:last-child td{border-bottom:0}
 .ro p{animation:fade .5s var(--ease) both}
 .ro p:nth-child(2){animation-delay:.25s}.ro p:nth-child(3){animation-delay:.5s}
 
-/* funnel: people (dots) flow through, drop-offs fall away */
-.fbar{position:relative}
-.fbar .flow{position:absolute;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--c1);left:0;animation:flow linear infinite;opacity:0}
-@keyframes flow{0%{left:0;opacity:0}10%{opacity:.9}85%{opacity:.9}100%{left:var(--w);opacity:0}}
-.fdrop div:nth-child(2){position:relative}
-.fall{position:absolute;left:-14px;top:0;width:6px;height:6px;border-radius:50%;background:var(--text3);animation:fall 1.8s ease-in infinite;opacity:0}
-.fdrop.big .fall{background:var(--amber)}
-@media (max-width:820px){.fstep,.fdrop{grid-template-columns:110px minmax(0,1fr) 80px;gap:10px}}
 .qv-open{cursor:pointer!important}
 .qv-open:hover{filter:brightness(1.15)}
 .qv-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}

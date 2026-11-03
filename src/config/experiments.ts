@@ -20,8 +20,8 @@ const ADD_TO_CART: ExperimentSetup = { metricTable: "add_to_cart_tracking", metr
 const SETUPS: Record<string, ExperimentSetup> = {
   "add-to-cart": ADD_TO_CART,
   "quick-view-ab-test": { ...ADD_TO_CART, preview: "quick" },
-  "new-ab-test": { metricTable: "whats_new_tracking", metric: "Clicked What’s New (whats_new_tracking)", verb: "clicked What’s New", metricShort: "What’s New click rate", preview: "whatsnew" },
-  "whats-new-ab-test": { metricTable: "whats_new_tracking", metric: "Clicked What’s New (whats_new_tracking)", verb: "clicked What’s New", metricShort: "What’s New click rate", preview: "whatsnew" },
+  "new-ab-test": { metricTable: "whats_new_tracking", metric: "Clicked the menu link (whats_new_tracking)", verb: "clicked the menu link", metricShort: "menu link click rate", preview: "whatsnew" },
+  "whats-new-ab-test": { metricTable: "whats_new_tracking", metric: "Clicked the menu link (whats_new_tracking)", verb: "clicked the menu link", metricShort: "menu link click rate", preview: "whatsnew" },
   "add-cart-button-experience": ADD_TO_CART,
   "add-cart-button-experience-ga4": ADD_TO_CART,
   "quick-view-style": { ...ADD_TO_CART, preview: "quick" },

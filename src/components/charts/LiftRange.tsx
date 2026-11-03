@@ -33,7 +33,12 @@ export function LiftRange({ lift: rawLift, range, lead }: LiftRangeProps) {
   const X = (v: number) => PL + ((v - lo) / (hi - lo)) * (W - PL - PR);
   const colour = lead ? "var(--accent)" : "var(--c1)";
   const zeroAt = b > a ? Math.min(1, Math.max(0, (0 - a) / (b - a))) : 0;
-  const above = b > a ? Math.round(Math.min(1, Math.max(0, b / (b - a))) * 100) : b > 0 ? 100 : 0;
+  const meaning =
+    a > 0
+      ? "even the low end is above zero, so the treatment is very likely better."
+      : b < 0
+        ? "even the high end is below zero, so the treatment is very likely worse."
+        : "the range crosses “No change”, so it’s too early to say if the treatment helps. It narrows as more people join.";
   const ticks = Array.from({ length: (hi - lo) / 10 + 1 }, (_, k) => lo + k * 10);
 
   return (
@@ -81,9 +86,17 @@ export function LiftRange({ lift: rawLift, range, lead }: LiftRangeProps) {
           </text>
         </svg>
       </div>
-      <p className="mt-2 text-[13px] text-text2">
-        The real lift is probably between <b>{a}%</b> and <b>+{b}%</b>, with a best guess of <b>{signed(lift, 1)}%</b>. About {above}% of that range is above zero. The range narrows as more people join.
-      </p>
+      <div className="mt-2 flex flex-col gap-1.5 text-[13px] text-text2">
+        <p>
+          <b className="text-text">Best guess:</b> the treatment’s rate is <b className="text-text">{Math.abs(lift).toFixed(1)}% {lift >= 0 ? "higher" : "lower"}</b> than the control’s.
+        </p>
+        <p>
+          <b className="text-text">Could really be:</b> anywhere from <b className="text-text">{signed(a)}%</b> to <b className="text-text">{signed(b)}%</b>.
+        </p>
+        <p>
+          <b className="text-text">What it means:</b> {meaning}
+        </p>
+      </div>
     </>
   );
 }

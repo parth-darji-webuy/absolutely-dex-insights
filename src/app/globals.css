@@ -502,8 +502,15 @@ kbd {
 .hdr-nav .nb { font: 700 8.5px var(--font-sans); font-style: normal; background: var(--s-red); color: #fff; border-radius: 999px; padding: 1px 5px; margin-left: 4px; vertical-align: 2px; }
 .hdr-icons { display: flex; gap: 6px; }
 .hdr-ib { position: relative; height: 30px; min-width: 30px; border-radius: 8px; background: #f1f1f3; display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: #222; padding: 0 7px; }
-.hdr-ib.wide { white-space: nowrap; } .hdr-ib.wide em { font: 700 11px Georgia, serif; font-style: normal; }
 .hdr-ib.cart { background: var(--s-violet); color: #fff; }
+/* Treatment of the theme test: the same header on a black background. */
+.hdr.dark { background: #000; border-color: #26262e; }
+.hdr.dark .hdr-logo { color: #fff; }
+.hdr.dark .hdr-logo small, .hdr.dark .hdr-nav { color: #d8d8e0; }
+.hdr.dark .hdr-nav .wn.hi { color: #8b83f0; }
+.hdr.dark .hdr-ib { background: #1b1b22; color: #e4e4ea; }
+.hdr.dark .hdr-ib.theme { background: #17171c; color: #f5b83d; border: 2px solid #fff; box-shadow: 0 0 0 2px #3b6fe0; }
+.hdr.dark .hdr-ib.cart { background: var(--s-violet); color: #fff; }
 .hdr-nav > span:nth-child(3) { display: none; }
 .hdr .wn .hot, .hdr .hdr-ib .hot { top: -24px; right: 50%; transform: translateX(50%); }
 @media (max-width: 1180px) { .hdr-nav > span:nth-child(2) { display: none; } }
@@ -528,7 +535,6 @@ kbd {
 @container (max-width: 310px) {
   .hdr-logo { font-size: 14px; }
   .hdr-icons .hdr-ib:not(.theme):not(.cart) { display: none; }
-  .hdr-ib.wide em { display: none; }
 }
 
 /* ============================================================

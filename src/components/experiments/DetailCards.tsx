@@ -78,7 +78,7 @@ export function ConversionCard({ e }: { e: Experiment }) {
 
 export function LiftCard({ e }: { e: Experiment }) {
   const title = "How big is the lift?";
-  const subtitle = "Likely range of the true lift · indicative";
+  const subtitle = "How much better or worse the treatment did than the control · estimate";
   return (
     <Guard title={title} subtitle={subtitle}>
       <Card title={title} subtitle={subtitle} delay={140}>

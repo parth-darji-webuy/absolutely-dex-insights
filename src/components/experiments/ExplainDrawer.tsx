@@ -8,6 +8,7 @@ import { SkeletonStack } from "@/components/ui/Skeleton";
 import { Tag } from "@/components/ui/Tag";
 import { liftText, remaining, trafficSplit } from "@/lib/experiment";
 import { fmt, pct } from "@/lib/format";
+import { verbFor } from "@/lib/verb";
 import type { Experiment } from "@/types";
 
 const B = ({ children }: { children: React.ReactNode }) => <b>{children}</b>;
@@ -37,7 +38,7 @@ function Words({ e }: { e: Experiment }) {
   return (
     <>
       <p>
-        <B>“{e.t.label}”</B>: <B>{pct(e.rt)}</B> of people {e.verb}, vs <B>{pct(e.rc)}</B> for <B>“{e.c.label}”</B>
+        <B>“{e.t.label}”</B>: <B>{pct(e.rt)}</B> of people {verbFor(e, "t")}, vs <B>{pct(e.rc)}</B> for <B>“{e.c.label}”</B>
         {e.rc > 0 ? `, a ${e.lift > 0 ? "lift" : "drop"} of ${pct(Math.abs(e.lift))}` : ""}.
       </p>
       <p>
@@ -72,9 +73,9 @@ export function ExplainButton({ e, ai = false }: { e: Experiment; ai?: boolean }
   const pace = e.days > 0 ? Math.round(e.people / e.days) : null;
   const nums: [string, string][] = [
     ["Control · people who saw it", fmt(e.c.people)],
-    [`Control · ${e.verb}`, `${fmt(e.c.conv)} (${pct(e.rc)})`],
+    [`Control · ${verbFor(e, "c")}`, `${fmt(e.c.conv)} (${pct(e.rc)})`],
     ["Treatment · people who saw it", fmt(e.t.people)],
-    [`Treatment · ${e.verb}`, `${fmt(e.t.conv)} (${pct(e.rt)})`],
+    [`Treatment · ${verbFor(e, "t")}`, `${fmt(e.t.conv)} (${pct(e.rt)})`],
     ["Relative lift", liftText(e)],
     ["Chance treatment is better", `${e.chance}%`],
     ["People needed", `~${fmt(e.needed)}`],

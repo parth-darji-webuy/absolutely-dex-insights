@@ -5,6 +5,7 @@ import { Tag } from "@/components/ui/Tag";
 import { cn } from "@/lib/cn";
 import { liftText } from "@/lib/experiment";
 import { fmt } from "@/lib/format";
+import { verbFor } from "@/lib/verb";
 import type { Experiment } from "@/types";
 
 /** Control or treatment: its name, conversion rate, how many people, and the storefront it shows. */
@@ -29,7 +30,7 @@ export function VariantCard({ e, side }: { e: Experiment; side: "c" | "t" }) {
       <div className="text-[15px] font-semibold">“{v.label}”</div>
       <div className="text-[32px] leading-[1.1] font-semibold tracking-[-.02em] tabular-nums">
         <CountUp value={rate} as="pct" />
-        <small className="ml-2 text-[13px] font-medium tracking-normal text-text2">{e.verb}</small>
+        <small className="ml-2 text-[13px] font-medium tracking-normal text-text2">{verbFor(e, side)}</small>
       </div>
       <div className="flex flex-wrap items-center gap-2.5 text-[13px] text-text2">
         <span>

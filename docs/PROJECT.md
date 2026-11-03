@@ -297,7 +297,7 @@ The **Explain this** button on an experiment's page opens a drawer with the resu
 5. When the reply is used, the tag reads *"Written by AI (Groq) from the numbers below"*. When it is not, because Groq is slow, busy, switched off or wrote a number it wasn't given, the drawer shows the app's own wording and the tag *"Written from the numbers, no AI"*. The drawer never shows an error for this.
 6. The same figures reuse one answer for 30 minutes (a failed attempt is remembered for 2 minutes), and the drawer asks only once per page visit. At most 20 requests a minute.
 
-The **Numbers used** table and the note *"Insights explains the numbers; it doesn't decide. The official result lives in GrowthBook"* are always shown and are never written by the AI. If a reply is rejected, the terminal prints one line (*"Explain: the AI's reply was not used:"* and the kind of problem), never the reply itself.
+The **Numbers used** table is always shown and is never written by the AI. If a reply is rejected, the terminal prints one line (*"Explain: the AI's reply was not used:"* and the kind of problem), never the reply itself.
 
 ### Switching it off
 

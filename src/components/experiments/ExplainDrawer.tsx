@@ -117,9 +117,6 @@ export function ExplainButton({ e, ai = false }: { e: Experiment; ai?: boolean }
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-[9px] rounded-[9px] border border-border bg-card2 px-3 py-2.5 text-[12.5px] text-text2">
-          <Icon name="info" /> Insights explains the numbers; it doesn’t decide. The official result lives in GrowthBook.
-        </div>
       </Drawer>
     </>
   );

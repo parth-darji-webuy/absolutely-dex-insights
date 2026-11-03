@@ -16,7 +16,6 @@ type Props = {
   meta: Record<EventType, EventMeta>;
   open: boolean;
   onClose: () => void;
-  onSeeQuickView: () => void;
 };
 
 const Code = ({ children }: { children: React.ReactNode }) => <code>{children}</code>;
@@ -59,7 +58,7 @@ function Problem({ missing, onRetry }: { missing: boolean; onRetry: () => void }
 
 const H4 = ({ children }: { children: React.ReactNode }) => <h4 className="mb-2.5 text-xs font-semibold tracking-[.06em] text-text3 uppercase">{children}</h4>;
 
-export function EventDrawer({ event: e, meta, open, onClose, onSeeQuickView }: Props) {
+export function EventDrawer({ event: e, meta, open, onClose }: Props) {
   const router = useRouter();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -128,16 +127,6 @@ export function EventDrawer({ event: e, meta, open, onClose, onSeeQuickView }: P
               </div>
             )}
           </div>
-          {e.event === "quick_view_clicked" && (
-            <div className="notice !justify-between">
-              <span className="flex items-center gap-[9px]">
-                <Icon name="eye" /> This visitor opened your quick view.
-              </span>
-              <Button size="sm" onClick={onSeeQuickView}>
-                See what they saw
-              </Button>
-            </div>
-          )}
           <VariantNotice type={e.event} />
         </>
       )}

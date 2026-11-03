@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { QuickViewModal } from "@/components/products/QuickViewModal";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ago, clock } from "@/lib/format";
-import type { AnalyticsEvent, EventMeta, EventType, QuickViewStats } from "@/types";
+import type { AnalyticsEvent, EventMeta, EventType } from "@/types";
 import { EventDrawer } from "./EventDrawer";
 import { EventName } from "./EventName";
 
@@ -13,18 +12,15 @@ type Props = {
   /** Newest first. The table shows the latest 20; the drawer's journey looks at all of them. */
   events: AnalyticsEvent[];
   meta: Record<EventType, EventMeta>;
-  qv: QuickViewStats;
-  weekLabel: string;
 };
 
 const SHOWN = 20;
 
 /** The latest events. Each "35s ago" keeps counting, and a row opens the drawer. */
-export function EventsTable({ events, meta, qv, weekLabel }: Props) {
+export function EventsTable({ events, meta }: Props) {
   const [, tick] = useState(0);
   const [selected, setSelected] = useState<AnalyticsEvent | null>(null);
   const [open, setOpen] = useState(false);
-  const [quickView, setQuickView] = useState(false);
 
   // "Ns ago" depends on the current time, so the server and the first client render would differ.
   // Show it only in the browser: false while rendering on the server and during hydration, true after.
@@ -102,12 +98,7 @@ export function EventsTable({ events, meta, qv, weekLabel }: Props) {
         meta={meta}
         open={open}
         onClose={() => setOpen(false)}
-        onSeeQuickView={() => {
-          setOpen(false);
-          setQuickView(true);
-        }}
       />
-      <QuickViewModal open={quickView} onClose={() => setQuickView(false)} qv={qv} weekLabel={weekLabel} />
     </>
   );
 }

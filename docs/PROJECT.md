@@ -175,7 +175,7 @@ Which tests appear: every test with entries in `experiment_tracking`, plus every
 - **Events per minute:** the last 60 minutes, stacked by type.
 - **Event mix:** the last 7 days as a donut: how many rows of each kind.
 - **Latest events:** the newest 40 rows from all six tables, with a time that keeps counting ("35s ago"), the event, the table, the product and the visitor.
-- **Click a row** (or press Enter) for the drawer: the **visitor's journey** (their events within 7 days of this one, newest 100, with "and N earlier"), **where the variant comes from** (each table links to experiments differently), the **row exactly as stored**, and **Copy JSON**. On a quick-view event, "See what they saw" opens the store's Quick View.
+- **Click a row** (or press Enter) for the drawer: the **visitor's journey** (their events within 7 days of this one, newest 100, with "and N earlier"), **where the variant comes from** (each table links to experiments differently), the **row exactly as stored**, and **Copy JSON**.
 
 ### Products (`/products`)
 

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getEvents, getEventsPerMinute } from "@/lib/data";
 import { fmt } from "@/lib/format";
-import { overview, products } from "@/lib/queries";
+import { overview } from "@/lib/queries";
 import { sum } from "@/lib/rng";
 import { EventsTable } from "./EventsTable";
 
@@ -44,8 +44,6 @@ export async function EventMixCard() {
 }
 
 export async function LatestEventsCard() {
-  const [events, o, p] = await Promise.all([getEvents(), overview(), products()]);
-  const days = o.days;
-  const weekLabel = days.length ? `${days[0]}${days.length > 1 ? ` – ${days.at(-1)?.split(" ").pop()}` : ""}` : "";
-  return <EventsTable events={events} meta={o.eventMeta} qv={p.qv} weekLabel={weekLabel} />;
+  const [events, o] = await Promise.all([getEvents(), overview()]);
+  return <EventsTable events={events} meta={o.eventMeta} />;
 }

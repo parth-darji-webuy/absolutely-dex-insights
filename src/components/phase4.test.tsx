@@ -50,14 +50,14 @@ describe("Store card when the store is quiet", () => {
 
 describe("Events page", () => {
   it("lists the latest 20 events, and leaves the 'ago' to the browser so it can't differ from the server's", () => {
-    const m = html(<EventsTable events={makeEvents(Date.now())} meta={EVT_META} qv={QV} weekLabel="Oct 10 – 16" />);
+    const m = html(<EventsTable events={makeEvents(Date.now())} meta={EVT_META} />);
     expect(m.match(/<tr class="click"/g)).toHaveLength(20);
     expect(m).not.toMatch(/\d+s ago/);
     expect(m).not.toMatch(BAD);
   });
 
   it("shows the empty state when there are no events", () => {
-    const m = html(<EventsTable events={[]} meta={EVT_META} qv={QV} weekLabel="" />);
+    const m = html(<EventsTable events={[]} meta={EVT_META} />);
     expect(m).toContain("No events yet");
     expect(m).not.toMatch(BAD);
   });

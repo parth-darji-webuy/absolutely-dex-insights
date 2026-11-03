@@ -13,7 +13,7 @@ export type IdKind = "uuid" | "cuid";
 /** Where an event is written, whether the row knows its variant, and its id type. */
 export type EventSchema = {
   table: string;
-  variation: "yes" | "no" | "hardcoded" | "stored";
+  variation: "yes" | "no" | "stored";
   id: IdKind;
 };
 

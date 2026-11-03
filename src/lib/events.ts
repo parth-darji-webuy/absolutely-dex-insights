@@ -1,12 +1,12 @@
 import type { AnalyticsEvent, EventType } from "@/types";
 
 /** Where each event's variant comes from. */
-export type VariantSource = "yes" | "no" | "hardcoded" | "stored";
+export type VariantSource = "yes" | "no" | "stored";
 
 export const VARIANT_SOURCE: Record<EventType, VariantSource> = {
   experiment_exposure: "yes",
   add_to_cart: "no",
-  quick_view_clicked: "hardcoded",
+  quick_view_clicked: "no",
   quick_view_cart: "no",
   whats_new_clicked: "stored",
   theme_toggle: "no",

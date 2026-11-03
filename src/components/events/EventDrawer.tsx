@@ -27,11 +27,6 @@ function VariantNotice({ type }: { type: EventType }) {
   return (
     <div className="notice">
       <Icon name="info" />
-      {v === "hardcoded" && (
-        <span>
-          <Code>quickview_tracking</Code> stores a hardcoded <Code>experimentKey</Code> and <Code>variationId</Code> from ProductCard.tsx, kept as it is. Insights takes the variant from <Code>experiment_tracking</Code> instead.
-        </span>
-      )}
       {v === "stored" && (
         <span>
           <Code>whats_new_tracking</Code> stores its own copy of the variant. Insights still takes the variant from <Code>experiment_tracking</Code>, so both pages always agree.

@@ -101,8 +101,7 @@ export function EventDrawer({ event: e, meta, open, onClose }: Props) {
             <H4>Visitor journey</H4>
             {detail ? (
               <div className="journey">
-                {detail.journey.earlier > 0 && <p className="pb-1 pl-7 text-xs text-text3">and {detail.journey.earlier} earlier</p>}
-                {detail.journey.steps.map((s) => {
+                {[...detail.journey.steps].reverse().map((s) => {
                   const [t, sub] = journeyText(s);
                   const cur = s.rowId === e.rowId && s.table === e.table;
                   return (
@@ -116,6 +115,7 @@ export function EventDrawer({ event: e, meta, open, onClose }: Props) {
                     </div>
                   );
                 })}
+                {detail.journey.earlier > 0 && <p className="pt-1 pl-7 text-xs text-text3">and {detail.journey.earlier} earlier</p>}
               </div>
             ) : current ? (
               <Problem missing={current.state === "missing"} onRetry={() => setAttempt((n) => n + 1)} />

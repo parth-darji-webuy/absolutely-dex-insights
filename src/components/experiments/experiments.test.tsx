@@ -13,7 +13,6 @@ import { ExperimentList } from "./ExperimentList";
 import { Race } from "./Race";
 import { TrafficLine } from "./TrafficLine";
 import { VariantCard } from "./VariantCard";
-import { VerdictCard } from "./VerdictCard";
 
 const BAD = /NaN|undefined|Infinity|null/;
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
@@ -54,7 +53,7 @@ describe("Experiments page", () => {
 describe("Experiment page pieces", () => {
   it("never print NaN or undefined, for any test or for an empty one", () => {
     for (const e of [...EXPS, EMPTY]) {
-      for (const el of [<VerdictCard key="v" e={e} />, <TrafficLine key="t" e={e} />, <Race key="r" e={e} />, <ExplainButton key="x" e={e} />]) expect(html(el)).not.toMatch(BAD);
+      for (const el of [<TrafficLine key="t" e={e} />, <Race key="r" e={e} />, <ExplainButton key="x" e={e} />]) expect(html(el)).not.toMatch(BAD);
       if (e.preview !== "quick") for (const side of ["c", "t"] as const) expect(html(<VariantCard e={e} side={side} />)).not.toMatch(BAD);
     }
   });
@@ -63,11 +62,6 @@ describe("Experiment page pieces", () => {
     const flagged = EXPS.filter((e) => html(<TrafficLine e={e} />).includes("Check events")).map((e) => e.key);
     expect(flagged).toEqual(["add-to-cart"]);
     expect(html(<TrafficLine e={EXPS[0]} />)).toContain("Traffic split 58 / 42");
-  });
-
-  it("shows the verdict the numbers give", () => {
-    expect(EXPS[0].verdict[0]).toBeTruthy();
-    expect(html(<VerdictCard e={EXPS[0]} />)).toContain(EXPS[0].verdict[0].replace(/’/g, "&#x27;"));
   });
 });
 

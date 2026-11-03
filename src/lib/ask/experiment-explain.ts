@@ -73,9 +73,6 @@ export function ungroundedNumbers(text: string, f: ExplainFacts): string[] {
   });
 }
 
-/** Every number in `text` is one of the numbers we gave the AI, so it cannot have invented one. */
-export const explainIsGrounded = (text: string, f: ExplainFacts): boolean => ungroundedNumbers(text, f).length === 0;
-
 /** One to four clean paragraphs, or null if the reply is empty or far too long. */
 export function cleanExplanation(reply: string): string[] | null {
   const text = reply.replace(/[*_`#>]/g, "").replace(/^[-•]\s+/gm, "").trim();

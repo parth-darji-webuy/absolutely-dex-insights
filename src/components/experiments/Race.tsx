@@ -14,14 +14,16 @@ const treatment = (lead: boolean): Look => ({ skin: "#9A6644", shirt: lead ? "#6
 function Lane({ side, label, rate, to, lead, index, look }: { side: "c" | "t"; label: string; rate: number; to: number; lead: boolean; index: number; look: Look }) {
   const runner = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
+  const [still, setStill] = useState(false);
 
-  // The runner sprints to its spot and stops; the leader gets a star.
+  // The runner sprints to its spot and keeps walking there, since the finish line is never reached; the leader gets a star.
   useEffect(() => {
     const el = runner.current;
     if (!el) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced || typeof el.animate !== "function") {
       el.style.left = `${to}%`;
+      setStill(reduced);
       setDone(true);
       return;
     }
@@ -53,7 +55,7 @@ function Lane({ side, label, rate, to, lead, index, look }: { side: "c" | "t"; l
       <span className="absolute inset-y-0 right-0 w-3 opacity-75" style={{ background: "repeating-conic-gradient(#262833 0 25%,#fff 0 50%) 0 0/6px 6px" }} />
       <div ref={runner} className="absolute bottom-1.5 -translate-x-1/2" style={{ left: "3%" }}>
         {lead && <span className={cn("absolute -top-4 left-1/2 -translate-x-1/2 text-[15px] text-[#F5B400] opacity-0 transition-opacity duration-[400ms]", done && "animate-[float_1.8s_ease-in-out_infinite] opacity-100")}>★</span>}
-        <Person look={look} h={54} motion={done ? "idle" : "walking"} className={done ? undefined : "run"} />
+        <Person look={look} h={54} motion={still ? "idle" : "walking"} className={done ? undefined : "run"} />
       </div>
     </div>
   );

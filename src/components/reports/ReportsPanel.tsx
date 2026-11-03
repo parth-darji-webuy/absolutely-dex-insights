@@ -153,7 +153,7 @@ export function ReportsPanel({ experiments, today, trackingStart }: { experiment
         </div>
       </section>
 
-      <Card title="Experiment reports" subtitle={`${shown.length} experiment${shown.length === 1 ? "" : "s"} · one row per day, per variant`} delay={60}>
+      <Card title="Experiment reports" delay={60}>
         <div className="table-wrap">
           <table className="t" style={{ margin: "0 -20px", width: "calc(100% + 40px)" }}>
             <thead>

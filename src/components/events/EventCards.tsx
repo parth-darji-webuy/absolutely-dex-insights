@@ -33,7 +33,7 @@ export async function PerMinuteCard() {
 
 export async function EventMixCard() {
   const o = await overview();
-  const keys = Object.keys(o.daily) as (keyof typeof o.daily)[];
+  const keys = (Object.keys(o.daily) as (keyof typeof o.daily)[]).filter((k) => k !== "quick_view_cart");
   const segments = keys.map((k) => ({ label: o.eventMeta[k].short, value: sum(o.daily[k]), color: o.eventMeta[k].c }));
   const total = sum(segments.map((s) => s.value));
   return (

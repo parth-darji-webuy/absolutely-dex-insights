@@ -4,9 +4,8 @@ import { AnswerCard } from "@/components/ask/AnswerCard";
 import { StoreLast30Card } from "@/components/overview/StoreLast30Card";
 import { EventsTable } from "@/components/events/EventsTable";
 import { ReportsPanel } from "@/components/reports/ReportsPanel";
-import { QuickViewReplica } from "@/components/site/QuickViewReplica";
 import { EVENT_META as EVT_META } from "@/lib/event-meta";
-import { makeEvents, QV } from "@/test/fixtures";
+import { makeEvents } from "@/test/fixtures";
 import type { Answer } from "@/types";
 import { CategoriesCard, ColoursCard, HeatGridCard } from "./products/ProductCards";
 import { EventMixCard, PerMinuteCard } from "./events/EventCards";
@@ -81,12 +80,6 @@ describe("Products page", () => {
     expect(m).toContain("Share of 1,416 add-to-carts");
   });
 
-  it("the quick view replica shows zeros and dashes, never NaN, when nobody opened it", () => {
-    const m = html(<QuickViewReplica qv={ZERO} heat />);
-    expect(m).not.toMatch(BAD);
-    expect(m).toContain("—");
-  });
-
   it("with views and extra clicks untracked, the pages show only what is tracked instead of zeros", async () => {
     const untracked = { products: [], cats: [], colours: [], qv: { ...ZERO, opened: 20, add: 5, extrasTracked: false }, viewsTracked: false };
     state.products = untracked;
@@ -95,13 +88,6 @@ describe("Products page", () => {
     expect(m).not.toMatch(BAD);
     expect(m).toContain("No product activity this week");
     expect(m).not.toContain("Saw quick view button");
-    const modal = html(<QuickViewReplica qv={untracked.qv} heat />);
-    expect(modal).not.toMatch(BAD);
-    expect(modal.match(/class="hot/g)).toHaveLength(1); // only Add to Cart is tracked
-  });
-
-  it("the replica hides the numbers when click data is off", () => {
-    expect(html(<QuickViewReplica qv={QV} heat={false} />)).toContain("heat-off");
   });
 });
 

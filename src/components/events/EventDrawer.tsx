@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
-import { journeyText, VARIANT_SOURCE } from "@/lib/events";
+import { journeyText } from "@/lib/events";
 import { clock } from "@/lib/format";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { AnalyticsEvent, EventDetail, EventMeta, EventType } from "@/types";
@@ -17,24 +16,6 @@ type Props = {
   open: boolean;
   onClose: () => void;
 };
-
-const Code = ({ children }: { children: React.ReactNode }) => <code>{children}</code>;
-
-/** Why the page can say which variant a row belongs to. */
-function VariantNotice({ type }: { type: EventType }) {
-  const v = VARIANT_SOURCE[type];
-  if (v === "yes" || v === "no") return null;
-  return (
-    <div className="notice">
-      <Icon name="info" />
-      {v === "stored" && (
-        <span>
-          <Code>whats_new_tracking</Code> stores its own copy of the variant. Insights still takes the variant from <Code>experiment_tracking</Code>, so both pages always agree.
-        </span>
-      )}
-    </div>
-  );
-}
 
 type Loaded = { key: string; state: "ready"; data: EventDetail } | { key: string; state: "missing" | "error" };
 
@@ -122,7 +103,6 @@ export function EventDrawer({ event: e, meta, open, onClose }: Props) {
               </div>
             )}
           </div>
-          <VariantNotice type={e.event} />
         </>
       )}
     </Drawer>

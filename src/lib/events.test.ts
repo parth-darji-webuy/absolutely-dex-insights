@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeEvents } from "@/test/fixtures";
-import { EVENT_TABLE, journeyText, VARIANT_SOURCE } from "./events";
+import { EVENT_TABLE, journeyText } from "./events";
 
 const events = makeEvents(Date.UTC(2026, 9, 28, 12));
 const hero = events.filter((e) => e.visitor === "kT9xQ2mLpA4w").sort((a, b) => a.ts - b.ts);
@@ -15,9 +15,8 @@ describe("events", () => {
     expect(journeyText(e)[1]).toBe("42mm · Obsidian Black · £520 · qty 1");
   });
 
-  it("knows where every event's variant comes from, and which table it is written to", () => {
+  it("knows which table every event is written to", () => {
     for (const e of events) {
-      expect(VARIANT_SOURCE[e.event]).toBeDefined();
       expect(EVENT_TABLE[e.event]).toBe(e.table);
     }
   });

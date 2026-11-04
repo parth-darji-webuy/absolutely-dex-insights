@@ -87,11 +87,10 @@ export async function loadOverview(now: Date = new Date()): Promise<Overview> {
 }
 
 const ZONES: { k: ZoneKey; x: number; icon: Zone["icon"]; label: string; src: EventType }[] = [
-  { k: "whatsnew", x: 10, icon: "spark", label: "opened What’s New", src: "whats_new_clicked" },
-  { k: "browse", x: 30, icon: "search", label: "browsed products", src: "experiment_exposure" },
-  { k: "theme", x: 50, icon: "moonS", label: "switched theme", src: "theme_toggle" },
-  { k: "quick", x: 70, icon: "eye", label: "opened quick view", src: "quick_view_clicked" },
-  { k: "cart", x: 90, icon: "bag", label: "added to cart", src: "add_to_cart" },
+  { k: "whatsnew", x: 12, icon: "spark", label: "opened What’s New", src: "whats_new_clicked" },
+  { k: "theme", x: 37, icon: "moonS", label: "switched theme", src: "theme_toggle" },
+  { k: "quick", x: 62, icon: "eye", label: "opened quick view", src: "quick_view_clicked" },
+  { k: "cart", x: 87, icon: "bag", label: "added to cart", src: "add_to_cart" },
 ];
 const PROPS: IdleVisitor["prop"][] = ["", "phone", "glass", "bag"];
 

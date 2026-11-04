@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 import { fmt } from "@/lib/format";
 import type { StoreLast30 } from "@/types";
 
-/** The store with its five stops, the count at each, and a few of the people standing there. */
+/** The store with its four stops, the count at each, and a few of the people standing there. */
 export function StoreScene({ zones, idle, minutes }: Pick<StoreLast30, "zones" | "idle"> & { minutes: number }) {
   return (
     <>

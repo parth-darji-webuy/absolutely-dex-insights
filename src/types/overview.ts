@@ -17,10 +17,10 @@ export type Overview = {
   daily: Record<EventType, number[]>;
 };
 
-export type ZoneKey = "whatsnew" | "browse" | "theme" | "quick" | "cart";
+export type ZoneKey = "whatsnew" | "theme" | "quick" | "cart";
 export type WalkerProp = "" | "phone" | "glass" | "bag";
 
-export type Zone = { k: ZoneKey; x: number; icon: "spark" | "search" | "moonS" | "eye" | "bag"; label: string; n: number };
+export type Zone = { k: ZoneKey; x: number; icon: "spark" | "moonS" | "eye" | "bag"; label: string; n: number };
 /** A visitor standing at a stop. `seed` only drives how the figure looks; it is never shown. */
 export type IdleVisitor = { zone: ZoneKey; x: number; prop: WalkerProp; seed: string };
 

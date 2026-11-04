@@ -49,17 +49,15 @@ export const EXPS: Experiment[] = [
 export const EBY: Record<string, Experiment> = Object.fromEntries(EXPS.map((e) => [e.key, e]));
 
 export const ZONES: Zone[] = [
-  { k: "whatsnew", x: 10, icon: "spark", label: "opened What’s New", n: 3 },
-  { k: "browse", x: 30, icon: "search", label: "browsed products", n: 41 },
-  { k: "theme", x: 50, icon: "moonS", label: "switched theme", n: 3 },
-  { k: "quick", x: 70, icon: "eye", label: "opened quick view", n: 9 },
-  { k: "cart", x: 90, icon: "bag", label: "added to cart", n: 7 },
+  { k: "whatsnew", x: 12, icon: "spark", label: "opened What’s New", n: 3 },
+  { k: "theme", x: 37, icon: "moonS", label: "switched theme", n: 3 },
+  { k: "quick", x: 62, icon: "eye", label: "opened quick view", n: 9 },
+  { k: "cart", x: 87, icon: "bag", label: "added to cart", n: 7 },
 ];
 export const IDLE: IdleVisitor[] = [
-  { zone: "whatsnew", x: 14, prop: "phone", seed: "wE8bA3iUc6Ry" },
-  { zone: "browse", x: 25, prop: "phone", seed: "Rb7nW3eYs0Qd" },
-  { zone: "quick", x: 66, prop: "glass", seed: "Xm1fJ6gNq9Ea" },
-  { zone: "cart", x: 94, prop: "bag", seed: "dS5yK0rTw7Bc" },
+  { zone: "whatsnew", x: 16, prop: "phone", seed: "wE8bA3iUc6Ry" },
+  { zone: "quick", x: 58, prop: "glass", seed: "Xm1fJ6gNq9Ea" },
+  { zone: "cart", x: 91, prop: "bag", seed: "dS5yK0rTw7Bc" },
 ];
 export const RECENT_MIN = 30;
 export const RECENT: Record<string, RecentWindow> = Object.fromEntries(

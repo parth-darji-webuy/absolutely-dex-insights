@@ -50,7 +50,7 @@ describe("with an empty database", () => {
     expect(overview.days).toHaveLength(7);
     expect(overview.visitors).toEqual([0, 0, 0, 0, 0, 0, 0]);
     expect(store.visitors).toBe(0);
-    expect(store.zones.map((z) => z.n)).toEqual([0, 0, 0, 0, 0]);
+    expect(store.zones.map((z) => z.n)).toEqual([0, 0, 0, 0]);
     expect(exps).toEqual([]);
     expect(one).toBeNull();
     expect(events).toEqual([]);
@@ -227,7 +227,7 @@ describe("store card", () => {
     const s = await loadStoreLast30(NOW);
     expect(s.visitors).toBe(3);
     expect(s.exposures).toBe(4);
-    expect(Object.fromEntries(s.zones.map((z) => [z.k, z.n]))).toEqual({ whatsnew: 0, browse: 0, theme: 1, quick: 0, cart: 2 });
+    expect(Object.fromEntries(s.zones.map((z) => [z.k, z.n]))).toEqual({ whatsnew: 0, theme: 1, quick: 0, cart: 2 });
     expect(s.recent.qv.mins).toEqual([0, 0, 3, 0, 1]);
     expect(s.recent.qv.c[0]).toBe(3);
     expect(s.recent.qv.t[0]).toBe(1);

@@ -68,7 +68,7 @@ describe("Experiment page pieces", () => {
 describe("Overview pieces", () => {
   const store = { zones: ZONES, idle: IDLE };
 
-  it("draws the five stops", () => {
+  it("draws the four stops", () => {
     const out = html(<StoreScene zones={store.zones} idle={store.idle} minutes={30} />);
     for (const z of ZONES) expect(out).toContain(z.label);
     expect(out).not.toMatch(BAD);

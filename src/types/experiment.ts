@@ -41,12 +41,8 @@ export type Experiment = Omit<ExperimentSeed, "verb" | "metricShort" | "series">
   /** Relative lift of treatment over control, in %. */
   lift: number;
   progress: number;
-  /** Likely range of the true lift, see LiftRange. */
-  liftCi: LiftRange;
 };
 
-/** Indicative lift range [low, high] in %, not GrowthBook's official interval. */
-export type LiftRange = [number, number];
 
 /** People shown the test each day, per variant. */
 export type DailySplit = { c: number[]; t: number[] };

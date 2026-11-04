@@ -1,4 +1,4 @@
-import { AreaChart, BarChart, LiftRange } from "@/components/charts";
+import { AreaChart, BarChart } from "@/components/charts";
 import { Card } from "@/components/ui/Card";
 import { CardBoundary } from "@/components/ui/CardBoundary";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -76,18 +76,6 @@ export function ConversionCard({ e }: { e: Experiment }) {
   );
 }
 
-export function LiftCard({ e }: { e: Experiment }) {
-  const title = "How big is the lift?";
-  const subtitle = "How much better or worse the treatment did than the control · estimate";
-  return (
-    <Guard title={title} subtitle={subtitle}>
-      <Card title={title} subtitle={subtitle} delay={140}>
-        {e.rc > 0 ? <LiftRange lift={e.lift} range={e.liftCi} lead={e.lead} /> : <EmptyState title="No lift to show yet" text="The control group hasn’t converted yet, so there is nothing to compare with." />}
-      </Card>
-    </Guard>
-  );
-}
-
 export function PeoplePerDayCard({ e }: { e: Experiment }) {
   const title = "People per day";
   const subtitle = "New people entering each variant";
@@ -98,17 +86,19 @@ export function PeoplePerDayCard({ e }: { e: Experiment }) {
         {dp.c.length === 0 ? (
           <EmptyState title="No people yet" text="Daily counts will show up once people enter the test." />
         ) : (
-          <BarChart
-            labels={expLabels(e)}
-            series={[
-              { name: e.c.label, color: "var(--text3)", values: dp.c, alpha: 0.55 },
-              { name: e.t.label, color: treatmentColour(e), values: dp.t },
-            ]}
-            w={520}
-            h={230}
-            every={2}
-            label="People per day"
-          />
+          <div className="mx-auto max-w-[780px]">
+            <BarChart
+              labels={expLabels(e)}
+              series={[
+                { name: e.c.label, color: "var(--text3)", values: dp.c, alpha: 0.55 },
+                { name: e.t.label, color: treatmentColour(e), values: dp.t },
+              ]}
+              w={520}
+              h={230}
+              every={2}
+              label="People per day"
+            />
+          </div>
         )}
       </Card>
     </Guard>

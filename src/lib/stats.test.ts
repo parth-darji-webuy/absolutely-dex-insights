@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chanceToWin, isLeading, liftRange, normalCdf, peopleNeeded, verdict } from "./stats";
+import { chanceToWin, isLeading, normalCdf, peopleNeeded, verdict } from "./stats";
 
 describe("normalCdf", () => {
   it("is 0.5 at zero and symmetric", () => {
@@ -26,21 +26,6 @@ describe("chanceToWin", () => {
   });
   it("never returns NaN, even for impossible counts", () => {
     for (const [c, t] of [[{ people: 5, conv: 9 }, { people: -3, conv: -1 }], [{ people: 0, conv: 4 }, { people: 1, conv: 0 }]] as const) expect(Number.isInteger(chanceToWin(c, t))).toBe(true);
-  });
-});
-
-describe("liftRange", () => {
-  it("brackets the observed lift, and is wider with less data", () => {
-    const [lo, hi] = liftRange({ people: 1000, conv: 100 }, { people: 1000, conv: 120 });
-    expect(lo).toBeLessThan(20);
-    expect(hi).toBeGreaterThan(20);
-    const [lo2, hi2] = liftRange({ people: 50, conv: 5 }, { people: 50, conv: 6 });
-    expect(hi2 - lo2).toBeGreaterThan(hi - lo);
-  });
-  it("stays within -100 and 1000", () => {
-    const [lo, hi] = liftRange({ people: 0, conv: 0 }, { people: 1, conv: 1 });
-    expect(lo).toBeGreaterThanOrEqual(-100);
-    expect(hi).toBeLessThanOrEqual(1000);
   });
 });
 

@@ -1,5 +1,4 @@
 import { fmt } from "./format";
-import type { LiftRange } from "@/types";
 
 // Plain-words statistics for two-variant tests. These are indicative, not GrowthBook's official result.
 
@@ -29,16 +28,6 @@ export function chanceToWin(c: Arm, t: Arm): number {
   const b = beta(t);
   const sd = Math.sqrt(a.variance + b.variance);
   return Math.round(normalCdf((b.mean - a.mean) / sd) * 100);
-}
-
-/** Likely range of the true relative lift in %, about 95% of the time. Wide when there is little data. */
-export function liftRange(c: Arm, t: Arm): LiftRange {
-  const a = beta(c);
-  const b = beta(t);
-  const ratio = b.mean / a.mean;
-  const se = ratio * Math.sqrt(b.variance / (b.mean * b.mean) + a.variance / (a.mean * a.mean));
-  const clamp = (v: number) => Math.max(-100, Math.min(1000, Math.round(v)));
-  return [clamp((ratio - 1 - 1.96 * se) * 100), clamp((ratio - 1 + 1.96 * se) * 100)];
 }
 
 /** People (both variants together) needed to tell the two rates apart reliably, rounded up to 100. Between 200 and 20,000 (2,000 while nobody has reached the goal). */

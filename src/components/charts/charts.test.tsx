@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Delta } from "@/components/ui/Delta";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { AreaChart, BarChart, Donut, HBars, LiftRange, MiniBars, Sparkline, XSpark } from ".";
+import { AreaChart, BarChart, Donut, HBars, MiniBars, Sparkline, XSpark } from ".";
 
 const BAD = /NaN|undefined|Infinity/;
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
@@ -30,9 +30,6 @@ describe("charts never print NaN, undefined or Infinity", () => {
     ["Donut empty", <Donut key="17" segments={[]} />],
     ["Donut all zero", <Donut key="18" segments={[{ label: "a", value: 0, color: "red" }, { label: "b", value: 0, color: "blue" }]} />],
     ["Donut one segment", <Donut key="19" segments={[{ label: "a", value: 5, color: "red" }]} center="5" sub="total" />],
-    ["LiftRange sample", <LiftRange key="23" lift={20} range={[-3, 45]} lead />],
-    ["LiftRange flat", <LiftRange key="24" lift={0} range={[0, 0]} />],
-    ["LiftRange broken", <LiftRange key="25" lift={NaN} range={[NaN, NaN]} />],
     ["XSpark empty", <XSpark key="26" control={[]} treatment={[]} />],
     ["XSpark one point", <XSpark key="27" control={[3]} treatment={[4]} />],
     ["XSpark flat", <XSpark key="28" control={[2, 2]} treatment={[2, 2]} />],

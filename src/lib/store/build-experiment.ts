@@ -1,7 +1,7 @@
 import { setupFor } from "@/config/experiments";
 import type { Experiment } from "@/types";
 import { sum } from "../rng";
-import { chanceToWin, isLeading, liftRange, peopleNeeded, verdict } from "../stats";
+import { chanceToWin, isLeading, peopleNeeded, verdict } from "../stats";
 
 export type Counts = {
   /** People who entered each variant on each day ("YYYY-MM-DD" -> number). */
@@ -72,6 +72,5 @@ export function buildExperiment(i: Input): Experiment {
     rt,
     lift,
     progress: Math.min(100, Math.round((people / needed) * 100)),
-    liftCi: liftRange({ people: cPeople, conv: cConv }, { people: tPeople, conv: tConv }),
   };
 }

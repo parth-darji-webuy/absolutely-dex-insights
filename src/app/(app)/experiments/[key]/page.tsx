@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/Icon";
-import { ConversionCard, LiftCard, PeoplePerDayCard, RaceCard } from "@/components/experiments/DetailCards";
+import { ConversionCard, PeoplePerDayCard, RaceCard } from "@/components/experiments/DetailCards";
 import { ExplainButton } from "@/components/experiments/ExplainDrawer";
 import { TrafficLine } from "@/components/experiments/TrafficLine";
 import { VariantCard } from "@/components/experiments/VariantCard";
@@ -57,10 +57,7 @@ export default async function Page({ params }: Props) {
       </div>
       <RaceCard e={e} />
       <ConversionCard e={e} />
-      <div className="grid grid-cols-2 gap-4 max-[820px]:grid-cols-1">
-        <LiftCard e={e} />
-        <PeoplePerDayCard e={e} />
-      </div>
+      <PeoplePerDayCard e={e} />
     </>
   );
 }

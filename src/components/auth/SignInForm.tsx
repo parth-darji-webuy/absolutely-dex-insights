@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { signInAction } from "@/app/sign-in/actions";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/Button";
@@ -42,6 +42,18 @@ export function SignInForm({ defaultEmail }: { defaultEmail: string }) {
   const [errors, setErrors] = useState<Errors>({});
   const [phase, setPhase] = useState<Phase>("idle");
   const [firstName, setFirstName] = useState("");
+
+  // cacheComponents keeps this page's state while it is hidden after sign-in, so a later logout would
+  // show the old "Welcome back" button. Reset when the page is hidden.
+  useEffect(
+    () => () => {
+      setPhase("idle");
+      setPassword("");
+      setShowPassword(false);
+      setErrors({});
+    },
+    [],
+  );
 
   const emailOk = EMAIL_RE.test(email.trim());
   const busy = phase !== "idle";

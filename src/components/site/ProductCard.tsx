@@ -4,8 +4,8 @@ import type { QuickViewStats } from "@/types";
 import { Hot } from "./Hot";
 
 /**
- * The store's product card. With `qv` the Quick View button and eye icon are shown, with the
- * share of people who used them; without it the card says there is no quick view in this version.
+ * The store's product card. With `quick` it shows the Quick View button (with `qv`, the share of
+ * people who used it); without it, the original version, the card has only the eye icon.
  */
 export function ProductCard({ quick = true, qv, onOpen }: { quick?: boolean; qv?: QuickViewStats; /** Makes the Quick View button and eye icon clickable. */ onOpen?: () => void }) {
   const share = (n: number) => (qv && qv.seen > 0 ? pct((n / qv.seen) * 100) : "—");
@@ -31,6 +31,9 @@ export function ProductCard({ quick = true, qv, onOpen }: { quick?: boolean; qv?
               <Icon name="bag" size="sm" /> Quick View
               {qv && <Hot tip={`Opened via the Quick View button: ${fmt(qv.btn)} of ${fmt(qv.seen)} who saw it`}>{share(qv.btn)}</Hot>}
             </button>
+          </div>
+        ) : (
+          <div className="sc-actions">
             <button className={`sc-eye hs${onOpen ? " qv-open" : ""}`} tabIndex={onOpen ? 0 : -1} aria-label="Quick view" onClick={onOpen}>
               <Icon name="eye" size="sm" />
               {qv && (
@@ -40,8 +43,6 @@ export function ProductCard({ quick = true, qv, onOpen }: { quick?: boolean; qv?
               )}
             </button>
           </div>
-        ) : (
-          <div className="sc-note">No quick view in this version</div>
         )}
       </div>
       <div className="sc-body">
